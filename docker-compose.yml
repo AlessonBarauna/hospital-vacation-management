@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: hospital-vacation-postgres
+    environment:
+      POSTGRES_DB: hospital_vacation_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - hospital_vacation_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  hospital_vacation_postgres_data:
