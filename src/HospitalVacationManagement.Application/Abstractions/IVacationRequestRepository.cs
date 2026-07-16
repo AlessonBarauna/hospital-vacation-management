@@ -9,7 +9,13 @@ public interface IVacationRequestRepository
         DateOnly startDate,
         DateOnly endDate,
         CancellationToken cancellationToken);
-        Task AddAsync(VacationRequest vacationRequest, CancellationToken cancellationToken);
-        Task<IReadOnlyCollection<VacationRequest>> GetAllAsync(CancellationToken cancellationToken);
-        Task<VacationRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task AddAsync(VacationRequest vacationRequest, CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<VacationRequest>> GetAllAsync(
+        VacationRequestStatus? status,
+        Guid? employeeId,
+        IReadOnlyCollection<Guid>? employeeIds,
+        DateOnly? startDate,
+        DateOnly? endDate,
+        CancellationToken cancellationToken);
+    Task<VacationRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 }

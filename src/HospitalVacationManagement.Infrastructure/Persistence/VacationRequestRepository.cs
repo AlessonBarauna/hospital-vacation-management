@@ -45,10 +45,43 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
 
     }
 
-    public async Task<IReadOnlyCollection<VacationRequest>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyCollection<VacationRequest>> GetAllAsync(
+    VacationRequestStatus? status,
+    Guid? employeeId,
+    IReadOnlyCollection<Guid>? employeeIds,
+    DateOnly? startDate,
+    DateOnly? endDate,
+    CancellationToken cancellationToken)
+{
+    var query = _dbContext.VacationRequests.AsQueryable();
+
+    if (status.HasValue)
     {
-        return await _dbContext.VacationRequests
-            .OrderBy(vacationRequest => vacationRequest.StartDate)
-            .ToListAsync(cancellationToken);
+        query = query.Where(vacationRequest => vacationRequest.Status == status.Value);
     }
+
+    if (employeeId.HasValue)
+    {
+        query = query.Where(vacationRequest => vacationRequest.EmployeeId == employeeId.Value);
+    }
+
+    if (employeeIds is not null && employeeIds.Count > 0)
+    {
+        query = query.Where(vacationRequest => employeeIds.Contains(vacationRequest.EmployeeId));
+    }
+
+    if (startDate.HasValue)
+    {
+        query = query.Where(vacationRequest => vacationRequest.EndDate >= startDate.Value);
+    }
+
+    if (endDate.HasValue)
+    {
+        query = query.Where(vacationRequest => vacationRequest.StartDate <= endDate.Value);
+    }
+
+    return await query
+        .OrderBy(vacationRequest => vacationRequest.StartDate)
+        .ToListAsync(cancellationToken);
+}
 }

@@ -1,6 +1,7 @@
 using HospitalVacationManagement.Application;
 using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Infrastructure;
+using HospitalVacationManagement.Domain.Vacations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +20,22 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/vacation-requests", async (
+    VacationRequestStatus? status,
+    Guid? employeeId,
+    Guid? departmentId,
+    DateOnly? startDate,
+    DateOnly? endDate,
     ListVacationRequestsHandler handler,
     CancellationToken cancellationToken) =>
 {
-    var response = await handler.HandleAsync(cancellationToken);
+    var request = new ListVacationRequestsRequest(
+        status,
+        employeeId,
+        departmentId,
+        startDate,
+        endDate);
+
+    var response = await handler.HandleAsync(request, cancellationToken);
 
     return Results.Ok(response);
 })

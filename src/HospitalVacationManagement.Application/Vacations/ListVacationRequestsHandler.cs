@@ -19,9 +19,28 @@ public sealed class ListVacationRequestsHandler
     }
 
     public async Task<IReadOnlyCollection<VacationRequestSummaryResponse>> HandleAsync(
-        CancellationToken cancellationToken)
+    ListVacationRequestsRequest request,
+    CancellationToken cancellationToken)
     {
-        var vacationRequests = await _vacationRequestRepository.GetAllAsync(cancellationToken);
+        IReadOnlyCollection<Guid>? employeeIds = null;
+
+        if (request.DepartmentId.HasValue)
+        {
+            var departmentEmployees = await _employeeRepository.GetByDepartmentIdAsync(
+                request.DepartmentId.Value,
+                cancellationToken);
+
+            employeeIds = departmentEmployees
+                .Select(employee => employee.Id)
+                .ToList();
+        }
+        var vacationRequests = await _vacationRequestRepository.GetAllAsync(
+            request.Status,
+            request.EmployeeId,
+            employeeIds,
+            request.StartDate,
+            request.EndDate,
+            cancellationToken);
 
         var response = new List<VacationRequestSummaryResponse>();
 
