@@ -26,10 +26,17 @@ public sealed class RejectVacationRequestHandler
             return new ChangeVacationRequestStatusResponse(false, ["Vacation request was not found."]);
         }
 
-        vacationRequest.Reject();
+        try
+        {
+            vacationRequest.Reject();
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new ChangeVacationRequestStatusResponse(true, []);
+            return new ChangeVacationRequestStatusResponse(true, []);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return new ChangeVacationRequestStatusResponse(false, [exception.Message]);
+        }
     }
 }
