@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<ListVacationRequestsHandler>();
         services.AddScoped<ApproveVacationRequestHandler>();
         services.AddScoped<RejectVacationRequestHandler>();
+        services.AddScoped<CancelVacationRequestHandler>();
 
         return services;
     }

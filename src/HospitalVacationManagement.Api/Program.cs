@@ -71,4 +71,18 @@ app.MapPut("/vacation-requests/{id:guid}/reject", async (
 .WithName("RejectVacationRequest")
 .WithOpenApi();
 
+app.MapPut("/vacation-requests/{id:guid}/cancel", async (
+    Guid id,
+    CancelVacationRequestHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(id, cancellationToken);
+
+    return response.IsSuccess
+        ? Results.NoContent()
+        : Results.BadRequest(response);
+})
+.WithName("CancelVacationRequest")
+.WithOpenApi();
+
 app.Run();

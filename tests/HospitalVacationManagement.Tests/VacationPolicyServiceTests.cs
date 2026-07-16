@@ -60,4 +60,32 @@ public sealed class VacationRequestTests
 
         Assert.Throws<InvalidOperationException>(() => vacationRequest.Reject());
     }
+
+    [Fact]
+    public void Cancel_ShouldChangeStatusToCancelled_WhenVacationRequestIsPending()
+    {
+        var vacationRequest = new VacationRequest(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new DateOnly(2026, 7, 10),
+            new DateOnly(2026, 7, 20),
+            VacationRequestStatus.Pending);
+
+        vacationRequest.Cancel();
+
+        Assert.Equal(VacationRequestStatus.Cancelled, vacationRequest.Status);
+    }
+
+    [Fact]
+    public void Cancel_ShouldThrowInvalidOperationException_WhenVacationRequestIsApproved()
+    {
+        var vacationRequest = new VacationRequest(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new DateOnly(2026, 7, 10),
+            new DateOnly(2026, 7, 20),
+            VacationRequestStatus.Approved);
+
+        Assert.Throws<InvalidOperationException>(() => vacationRequest.Cancel());
+    }
 }

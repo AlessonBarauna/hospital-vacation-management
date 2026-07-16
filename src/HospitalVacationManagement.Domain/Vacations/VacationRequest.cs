@@ -34,6 +34,22 @@ public sealed class VacationRequest
         }
 
         Status = VacationRequestStatus.Rejected;
+
+    }
+
+    public void Cancel()
+    {
+        if (Status == VacationRequestStatus.Cancelled)
+        {
+            throw new InvalidOperationException("Vacation request is already cancelled.");
+        }
+
+        if (Status == VacationRequestStatus.Approved)
+        {
+            throw new InvalidOperationException("Approved vacation requests cannot be cancelled.");
+        }
+
+        Status = VacationRequestStatus.Cancelled;
     }
 
     public Guid Id { get; }
