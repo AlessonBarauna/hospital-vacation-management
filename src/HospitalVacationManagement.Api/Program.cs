@@ -32,4 +32,15 @@ app.MapPost("/vacation-requests/validate", async (
 .WithName("ValidateVacationRequest")
 .WithOpenApi();
 
+app.MapGet("/vacation-requests", async (
+    ListVacationRequestsHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(cancellationToken);
+
+    return Results.Ok(response);
+})
+.WithName("ListVacationRequests")
+.WithOpenApi();
+
 app.Run();

@@ -1,4 +1,5 @@
 using HospitalVacationManagement.Application.Abstractions;
+using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Domain.Vacations;
 using HospitalVacationManagement.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,11 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
     {
         _dbContext = dbContext;
     }
+
+    public async Task AddAsync(VacationRequest vacationRequest, CancellationToken cancellationToken)
+{
+    await _dbContext.VacationRequests.AddAsync(vacationRequest, cancellationToken);
+}
 
     public async Task<IReadOnlyCollection<VacationRequest>> GetApprovedByDepartmentIdAsync(
         Guid departmentId,
@@ -29,6 +35,14 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
             .Where(vacation => vacation.Status == VacationRequestStatus.Approved)
             .Where(vacation => employeeIds.Contains(vacation.EmployeeId))
             .Where(vacation => vacation.StartDate <= endDate && startDate <= vacation.EndDate)
+            .ToListAsync(cancellationToken);
+
+    }
+
+    public async Task<IReadOnlyCollection<VacationRequest>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await _dbContext.VacationRequests
+            .OrderBy(vacationRequest => vacationRequest.StartDate)
             .ToListAsync(cancellationToken);
     }
 }

@@ -9,4 +9,6 @@ public interface IVacationRequestRepository
         DateOnly startDate,
         DateOnly endDate,
         CancellationToken cancellationToken);
+        Task AddAsync(VacationRequest vacationRequest, CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<VacationRequest>> GetAllAsync(CancellationToken cancellationToken);
 }
