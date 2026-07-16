@@ -1,30 +1,31 @@
 using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Domain.Employees;
+using HospitalVacationManagement.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace HospitalVacationManagement.Infrastructure.Persistence;
 
 public sealed class EmployeeRepository : IEmployeeRepository
 {
-    private readonly InMemoryDatabase _database;
+    private readonly AppDbContext _dbContext;
 
-    public EmployeeRepository(InMemoryDatabase database)
+    public EmployeeRepository(AppDbContext dbContext)
     {
-        _database = database;
+        _dbContext = dbContext;
     }
 
-    public Task<Employee?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Employee?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var employee = _database.Employees.FirstOrDefault(candidate => candidate.Id == id);
-
-        return Task.FromResult(employee);
+        return await _dbContext.Employees
+            .FirstOrDefaultAsync(employee => employee.Id == id, cancellationToken);
     }
 
-    public Task<IReadOnlyCollection<Employee>> GetByDepartmentIdAsync(Guid departmentId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyCollection<Employee>> GetByDepartmentIdAsync(
+        Guid departmentId,
+        CancellationToken cancellationToken)
     {
-        var employees = _database.Employees
-            .Where(candidate => candidate.DepartmentId == departmentId)
-            .ToList();
-
-        return Task.FromResult<IReadOnlyCollection<Employee>>(employees);
+        return await _dbContext.Employees
+            .Where(employee => employee.DepartmentId == departmentId)
+            .ToListAsync(cancellationToken);
     }
 }

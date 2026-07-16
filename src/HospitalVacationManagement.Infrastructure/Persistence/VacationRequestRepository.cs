@@ -1,28 +1,34 @@
 using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Domain.Vacations;
+using HospitalVacationManagement.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace HospitalVacationManagement.Infrastructure.Persistence;
 
 public sealed class VacationRequestRepository : IVacationRequestRepository
 {
-    private readonly InMemoryDatabase _database;
+    private readonly AppDbContext _dbContext;
 
-    public VacationRequestRepository(InMemoryDatabase database)
+    public VacationRequestRepository(AppDbContext dbContext)
     {
-        _database = database;
+        _dbContext = dbContext;
     }
 
-    public Task<IReadOnlyCollection<VacationRequest>> GetApprovedByDepartmentIdAsync(
+    public async Task<IReadOnlyCollection<VacationRequest>> GetApprovedByDepartmentIdAsync(
         Guid departmentId,
         DateOnly startDate,
         DateOnly endDate,
         CancellationToken cancellationToken)
     {
-        var vacationRequests = _database.VacationRequests
-            .Where(vacation => vacation.Status == VacationRequestStatus.Approved)
-            .Where(vacation => vacation.Overlaps(startDate, endDate))
-            .ToList();
+        var employeeIds = await _dbContext.Employees
+            .Where(employee => employee.DepartmentId == departmentId)
+            .Select(employee => employee.Id)
+            .ToListAsync(cancellationToken);
 
-        return Task.FromResult<IReadOnlyCollection<VacationRequest>>(vacationRequests);
+        return await _dbContext.VacationRequests
+            .Where(vacation => vacation.Status == VacationRequestStatus.Approved)
+            .Where(vacation => employeeIds.Contains(vacation.EmployeeId))
+            .Where(vacation => vacation.StartDate <= endDate && startDate <= vacation.EndDate)
+            .ToListAsync(cancellationToken);
     }
 }
