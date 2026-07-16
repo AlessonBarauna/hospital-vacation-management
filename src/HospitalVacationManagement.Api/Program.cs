@@ -3,6 +3,7 @@ using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Infrastructure;
 using HospitalVacationManagement.Domain.Vacations;
 using FluentValidation;
+using HospitalVacationManagement.Application.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/vacation-requests", async (
-    IValidator<ValidateVacationRequest> validator,
     VacationRequestStatus? status,
     Guid? employeeId,
     Guid? departmentId,
@@ -29,6 +29,7 @@ app.MapGet("/vacation-requests", async (
     DateOnly? endDate,
     int page,
     int pageSize,
+    IValidator<ListVacationRequestsRequest> validator,
     ListVacationRequestsHandler handler,
     CancellationToken cancellationToken) =>
 {
@@ -40,6 +41,14 @@ app.MapGet("/vacation-requests", async (
         endDate,
         page,
         pageSize);
+
+    var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(new ApiErrorResponse(
+            validationResult.Errors.Select(error => error.ErrorMessage).ToList()));
+    }
 
     var response = await handler.HandleAsync(request, cancellationToken);
 
@@ -58,7 +67,8 @@ app.MapPost("/vacation-requests", async (
 
     if (!validationResult.IsValid)
     {
-        return Results.BadRequest(validationResult.Errors.Select(error => error.ErrorMessage));
+        return Results.BadRequest(new ApiErrorResponse(
+    validationResult.Errors.Select(error => error.ErrorMessage).ToList()));
     }
 
     var response = await handler.HandleAsync(request, cancellationToken);
