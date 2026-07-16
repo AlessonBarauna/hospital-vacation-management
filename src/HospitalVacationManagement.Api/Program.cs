@@ -18,6 +18,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapGet("/vacation-requests", async (
+    ListVacationRequestsHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(cancellationToken);
+
+    return Results.Ok(response);
+})
+.WithName("ListVacationRequests")
+.WithOpenApi();
+
 app.MapPost("/vacation-requests/validate", async (
     ValidateVacationRequest request,
     ValidateVacationRequestHandler handler,
@@ -32,15 +43,32 @@ app.MapPost("/vacation-requests/validate", async (
 .WithName("ValidateVacationRequest")
 .WithOpenApi();
 
-app.MapGet("/vacation-requests", async (
-    ListVacationRequestsHandler handler,
+app.MapPut("/vacation-requests/{id:guid}/approve", async (
+    Guid id,
+    ApproveVacationRequestHandler handler,
     CancellationToken cancellationToken) =>
 {
-    var response = await handler.HandleAsync(cancellationToken);
+    var response = await handler.HandleAsync(id, cancellationToken);
 
-    return Results.Ok(response);
+    return response.IsSuccess
+        ? Results.NoContent()
+        : Results.BadRequest(response);
 })
-.WithName("ListVacationRequests")
+.WithName("ApproveVacationRequest")
+.WithOpenApi();
+
+app.MapPut("/vacation-requests/{id:guid}/reject", async (
+    Guid id,
+    RejectVacationRequestHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(id, cancellationToken);
+
+    return response.IsSuccess
+        ? Results.NoContent()
+        : Results.BadRequest(response);
+})
+.WithName("RejectVacationRequest")
 .WithOpenApi();
 
 app.Run();

@@ -11,4 +11,5 @@ public interface IVacationRequestRepository
         CancellationToken cancellationToken);
         Task AddAsync(VacationRequest vacationRequest, CancellationToken cancellationToken);
         Task<IReadOnlyCollection<VacationRequest>> GetAllAsync(CancellationToken cancellationToken);
+        Task<VacationRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 }

@@ -11,7 +11,9 @@ public static class DependencyInjection
         services.AddScoped<IVacationPolicyService, VacationPolicyService>();
         services.AddScoped<ValidateVacationRequestHandler>();
         services.AddScoped<ListVacationRequestsHandler>();
-        
+        services.AddScoped<ApproveVacationRequestHandler>();
+        services.AddScoped<RejectVacationRequestHandler>();
+
         return services;
     }
 }

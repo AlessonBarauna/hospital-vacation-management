@@ -16,11 +16,31 @@ public sealed class VacationRequest
         Status = status;
     }
 
+    public void Approve()
+    {
+        if (Status != VacationRequestStatus.Pending)
+        {
+            throw new InvalidOperationException("Only pending vacation requests can be approved.");
+        }
+
+        Status = VacationRequestStatus.Approved;
+    }
+
+    public void Reject()
+    {
+        if (Status != VacationRequestStatus.Pending)
+        {
+            throw new InvalidOperationException("Only pending vacation requests can be rejected.");
+        }
+
+        Status = VacationRequestStatus.Rejected;
+    }
+
     public Guid Id { get; }
     public Guid EmployeeId { get; }
     public DateOnly StartDate { get; }
     public DateOnly EndDate { get; }
-    public VacationRequestStatus Status { get; }
+    public VacationRequestStatus Status { get; private set; }
 
     public bool Overlaps(DateOnly startDate, DateOnly endDate)
     {

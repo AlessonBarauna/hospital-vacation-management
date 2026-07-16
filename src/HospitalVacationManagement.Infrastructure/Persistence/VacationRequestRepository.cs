@@ -16,9 +16,15 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
     }
 
     public async Task AddAsync(VacationRequest vacationRequest, CancellationToken cancellationToken)
-{
-    await _dbContext.VacationRequests.AddAsync(vacationRequest, cancellationToken);
-}
+    {
+        await _dbContext.VacationRequests.AddAsync(vacationRequest, cancellationToken);
+    }
+
+    public async Task<VacationRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await _dbContext.VacationRequests
+            .FirstOrDefaultAsync(vacationRequest => vacationRequest.Id == id, cancellationToken);
+    }
 
     public async Task<IReadOnlyCollection<VacationRequest>> GetApprovedByDepartmentIdAsync(
         Guid departmentId,
