@@ -17,4 +17,9 @@ public sealed class AppDbContext : DbContext
     public DbSet<Department> Departments => Set<Department>();
 
     public DbSet<VacationRequest> VacationRequests => Set<VacationRequest>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
 }
