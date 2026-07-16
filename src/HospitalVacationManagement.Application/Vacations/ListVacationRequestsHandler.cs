@@ -18,10 +18,14 @@ public sealed class ListVacationRequestsHandler
         _departmentRepository = departmentRepository;
     }
 
-    public async Task<IReadOnlyCollection<VacationRequestSummaryResponse>> HandleAsync(
+    public async Task<PagedResponse<VacationRequestSummaryResponse>> HandleAsync(
     ListVacationRequestsRequest request,
     CancellationToken cancellationToken)
     {
+
+        var page = request.Page <= 0 ? 1 : request.Page;
+        var pageSize = request.PageSize <= 0 ? 10 : request.PageSize;
+        pageSize = pageSize > 100 ? 100 : pageSize;
         IReadOnlyCollection<Guid>? employeeIds = null;
 
         if (request.DepartmentId.HasValue)
@@ -40,6 +44,8 @@ public sealed class ListVacationRequestsHandler
             employeeIds,
             request.StartDate,
             request.EndDate,
+            page,
+            pageSize,
             cancellationToken);
 
         var response = new List<VacationRequestSummaryResponse>();
@@ -77,6 +83,21 @@ public sealed class ListVacationRequestsHandler
                 vacationRequest.Status));
         }
 
-        return response;
+        var totalItems = await _vacationRequestRepository.CountAsync(
+            request.Status,
+            request.EmployeeId,
+            employeeIds,
+            request.StartDate,
+            request.EndDate,
+            cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        return new PagedResponse<VacationRequestSummaryResponse>(
+            response,
+            page,
+            pageSize,
+            totalItems,
+            totalPages);
     }
 }

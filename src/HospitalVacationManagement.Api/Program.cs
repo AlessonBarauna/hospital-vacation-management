@@ -25,6 +25,8 @@ app.MapGet("/vacation-requests", async (
     Guid? departmentId,
     DateOnly? startDate,
     DateOnly? endDate,
+    int page,
+    int pageSize,
     ListVacationRequestsHandler handler,
     CancellationToken cancellationToken) =>
 {
@@ -33,7 +35,9 @@ app.MapGet("/vacation-requests", async (
         employeeId,
         departmentId,
         startDate,
-        endDate);
+        endDate,
+        page,
+        pageSize);
 
     var response = await handler.HandleAsync(request, cancellationToken);
 

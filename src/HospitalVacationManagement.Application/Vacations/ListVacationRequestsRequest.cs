@@ -7,4 +7,6 @@ public sealed record ListVacationRequestsRequest(
     Guid? EmployeeId,
     Guid? DepartmentId,
     DateOnly? StartDate,
-    DateOnly? EndDate);
+    DateOnly? EndDate,
+    int Page,
+    int PageSize);
