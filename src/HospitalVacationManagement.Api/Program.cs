@@ -2,6 +2,7 @@ using HospitalVacationManagement.Application;
 using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Infrastructure;
 using HospitalVacationManagement.Domain.Vacations;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/vacation-requests", async (
+    IValidator<ValidateVacationRequest> validator,
     VacationRequestStatus? status,
     Guid? employeeId,
     Guid? departmentId,
@@ -46,18 +48,26 @@ app.MapGet("/vacation-requests", async (
 .WithName("ListVacationRequests")
 .WithOpenApi();
 
-app.MapPost("/vacation-requests/validate", async (
-    ValidateVacationRequest request,
-    ValidateVacationRequestHandler handler,
+app.MapPost("/vacation-requests", async (
+    RequestVacationRequest request,
+    IValidator<RequestVacationRequest> validator,
+    RequestVacationHandler handler,
     CancellationToken cancellationToken) =>
 {
+    var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(validationResult.Errors.Select(error => error.ErrorMessage));
+    }
+
     var response = await handler.HandleAsync(request, cancellationToken);
 
     return response.IsValid
-        ? Results.Ok(response)
+        ? Results.Created($"/vacation-requests/{response.VacationRequestId}", response)
         : Results.BadRequest(response);
 })
-.WithName("ValidateVacationRequest")
+.WithName("RequestVacation")
 .WithOpenApi();
 
 app.MapPut("/vacation-requests/{id:guid}/approve", async (
