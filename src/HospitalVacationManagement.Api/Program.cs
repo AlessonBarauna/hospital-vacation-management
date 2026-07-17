@@ -91,6 +91,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapHealthChecks("/health");
 
+app.MapGet("/health/live", () => Results.Ok("Healthy"))
+    .WithName("Liveness")
+    .WithOpenApi();
+
 app.MapGet("/version", (IHostEnvironment environment) =>
 {
     var response = new VersionResponse(

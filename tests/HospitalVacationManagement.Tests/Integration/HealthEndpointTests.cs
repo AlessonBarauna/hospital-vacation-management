@@ -12,11 +12,11 @@ public sealed class HealthEndpointTests : IClassFixture<CustomWebApplicationFact
     }
 
     [Fact]
-    public async Task GetHealth_ShouldReturnSuccessStatusCode()
+    public async Task GetHealthLive_ShouldReturnSuccessStatusCode()
     {
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/health");
+        var response = await client.GetAsync("/health/live");
 
         response.EnsureSuccessStatusCode();
     }
