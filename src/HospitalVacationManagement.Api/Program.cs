@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using HospitalVacationManagement.Application.Departments;
 using HospitalVacationManagement.Application.Employees;
+using HospitalVacationManagement.Application.System;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -89,6 +90,19 @@ app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHealthChecks("/health");
+
+app.MapGet("/version", (IHostEnvironment environment) =>
+{
+    var response = new VersionResponse(
+        "Hospital Vacation Management API",
+        environment.EnvironmentName,
+        "1.0.0",
+        DateTime.UtcNow);
+
+    return Results.Ok(response);
+})
+.WithName("GetVersion")
+.WithOpenApi();
 
 if (app.Environment.IsDevelopment())
 {
