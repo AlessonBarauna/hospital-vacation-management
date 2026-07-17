@@ -10,6 +10,11 @@ services:
       - "5432:5432"
     volumes:
       - hospital_vacation_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hospital_vacation_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
@@ -17,7 +22,8 @@ services:
       dockerfile: Dockerfile
     container_name: hospital-vacation-api
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
