@@ -11,5 +11,23 @@ services:
     volumes:
       - hospital_vacation_postgres_data:/var/lib/postgresql/data
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hospital-vacation-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=hospital_vacation_management;Username=postgres;Password=postgres
+      Jwt__Issuer: HospitalVacationManagement
+      Jwt__Audience: HospitalVacationManagement
+      Jwt__SecretKey: this-is-a-development-secret-key-with-at-least-32-characters
+      Jwt__ExpirationInMinutes: 60
+    ports:
+      - "8080:8080"
+
 volumes:
   hospital_vacation_postgres_data:
