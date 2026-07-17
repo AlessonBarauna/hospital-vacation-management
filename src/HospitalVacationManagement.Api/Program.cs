@@ -5,6 +5,12 @@ using HospitalVacationManagement.Domain.Vacations;
 using FluentValidation;
 using HospitalVacationManagement.Application.Common;
 using Serilog;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using HospitalVacationManagement.Application.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -18,7 +24,33 @@ builder.Host.UseSerilog((context, configuration) =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Digite o token JWT no formato: Bearer {seu_token}"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            []
+        }
+    });
+});
 builder.Services
     .AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
@@ -26,9 +58,34 @@ builder.Services
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"];
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSecretKey!))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapHealthChecks("/health");
 
 if (app.Environment.IsDevelopment())
@@ -36,6 +93,47 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapPost("/auth/login", (
+    LoginRequest request,
+    IConfiguration configuration) =>
+{
+    if (!string.Equals(request.Email, "admin@hospital.com", StringComparison.OrdinalIgnoreCase)
+        || request.Password != "Admin@123")
+    {
+        return Results.Unauthorized();
+    }
+
+    var issuer = configuration["Jwt:Issuer"];
+    var audience = configuration["Jwt:Audience"];
+    var secretKey = configuration["Jwt:SecretKey"];
+    var expirationInMinutes = int.Parse(configuration["Jwt:ExpirationInMinutes"]!);
+
+    var expiresAt = DateTime.UtcNow.AddMinutes(expirationInMinutes);
+
+    var claims = new List<Claim>
+    {
+        new(JwtRegisteredClaimNames.Sub, request.Email),
+        new(ClaimTypes.Email, request.Email),
+        new(ClaimTypes.Role, "Admin")
+    };
+
+    var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
+    var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+
+    var token = new JwtSecurityToken(
+        issuer,
+        audience,
+        claims,
+        expires: expiresAt,
+        signingCredentials: credentials);
+
+    var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+    return Results.Ok(new LoginResponse(accessToken, expiresAt));
+})
+.WithName("Login")
+.WithOpenApi();
 
 app.MapGet("/vacation-requests", async (
     VacationRequestStatus? status,
@@ -71,7 +169,8 @@ app.MapGet("/vacation-requests", async (
     return Results.Ok(response);
 })
 .WithName("ListVacationRequests")
-.WithOpenApi();
+.WithOpenApi()
+.RequireAuthorization();
 
 app.MapPost("/vacation-requests", async (
     RequestVacationRequest request,
@@ -94,7 +193,8 @@ app.MapPost("/vacation-requests", async (
         : Results.BadRequest(response);
 })
 .WithName("RequestVacation")
-.WithOpenApi();
+.WithOpenApi()
+.RequireAuthorization();
 
 app.MapPut("/vacation-requests/{id:guid}/approve", async (
     Guid id,
@@ -108,7 +208,8 @@ app.MapPut("/vacation-requests/{id:guid}/approve", async (
         : Results.BadRequest(response);
 })
 .WithName("ApproveVacationRequest")
-.WithOpenApi();
+.WithOpenApi()
+.RequireAuthorization();
 
 app.MapPut("/vacation-requests/{id:guid}/reject", async (
     Guid id,
@@ -122,7 +223,8 @@ app.MapPut("/vacation-requests/{id:guid}/reject", async (
         : Results.BadRequest(response);
 })
 .WithName("RejectVacationRequest")
-.WithOpenApi();
+.WithOpenApi()
+.RequireAuthorization();
 
 app.MapPut("/vacation-requests/{id:guid}/cancel", async (
     Guid id,
@@ -136,6 +238,7 @@ app.MapPut("/vacation-requests/{id:guid}/cancel", async (
         : Results.BadRequest(response);
 })
 .WithName("CancelVacationRequest")
-.WithOpenApi();
+.WithOpenApi()
+.RequireAuthorization();
 
 app.Run();
