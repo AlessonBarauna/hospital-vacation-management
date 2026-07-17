@@ -1,6 +1,7 @@
 using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Domain.Vacations;
 using Microsoft.Extensions.DependencyInjection;
+using HospitalVacationManagement.Application.Authentication;
 using FluentValidation;
 
 namespace HospitalVacationManagement.Application;
@@ -17,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<RejectVacationRequestHandler>();
         services.AddScoped<CancelVacationRequestHandler>();
         services.AddScoped<RequestVacationHandler>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;
     }

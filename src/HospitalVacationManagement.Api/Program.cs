@@ -5,8 +5,6 @@ using HospitalVacationManagement.Domain.Vacations;
 using FluentValidation;
 using HospitalVacationManagement.Application.Common;
 using Serilog;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using HospitalVacationManagement.Application.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,6 +15,8 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<JwtOptions>(
+    builder.Configuration.GetSection("Jwt"));
 
 builder.Host.UseSerilog((context, configuration) =>
 {
@@ -96,7 +96,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapPost("/auth/login", (
     LoginRequest request,
-    IConfiguration configuration) =>
+    IJwtTokenGenerator jwtTokenGenerator) =>
 {
     if (!string.Equals(request.Email, "admin@hospital.com", StringComparison.OrdinalIgnoreCase)
         || request.Password != "Admin@123")
@@ -104,33 +104,9 @@ app.MapPost("/auth/login", (
         return Results.Unauthorized();
     }
 
-    var issuer = configuration["Jwt:Issuer"];
-    var audience = configuration["Jwt:Audience"];
-    var secretKey = configuration["Jwt:SecretKey"];
-    var expirationInMinutes = int.Parse(configuration["Jwt:ExpirationInMinutes"]!);
+    var response = jwtTokenGenerator.Generate(request.Email, "Admin");
 
-    var expiresAt = DateTime.UtcNow.AddMinutes(expirationInMinutes);
-
-    var claims = new List<Claim>
-    {
-        new(JwtRegisteredClaimNames.Sub, request.Email),
-        new(ClaimTypes.Email, request.Email),
-        new(ClaimTypes.Role, "Admin")
-    };
-
-    var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
-    var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
-    var token = new JwtSecurityToken(
-        issuer,
-        audience,
-        claims,
-        expires: expiresAt,
-        signingCredentials: credentials);
-
-    var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
-
-    return Results.Ok(new LoginResponse(accessToken, expiresAt));
+    return Results.Ok(response);
 })
 .WithName("Login")
 .WithOpenApi();
