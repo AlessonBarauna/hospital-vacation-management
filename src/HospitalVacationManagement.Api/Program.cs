@@ -327,4 +327,18 @@ app.MapGet("/departments/{departmentId:guid}/employees", async (
 .WithName("ListEmployeesByDepartment")
 .WithOpenApi();
 
+app.MapGet("/vacation-requests/{id:guid}", async (
+    Guid id,
+    GetVacationRequestByIdHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(id, cancellationToken);
+
+    return response is null
+        ? Results.NotFound()
+        : Results.Ok(response);
+})
+.WithName("GetVacationRequestById")
+.WithOpenApi();
+
 app.Run();

@@ -104,8 +104,9 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
         return query;
     }
 
-    public Task<VacationRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<VacationRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await _dbContext.VacationRequests
+            .FirstOrDefaultAsync(vacationRequest => vacationRequest.Id == id, cancellationToken);
     }
 }
