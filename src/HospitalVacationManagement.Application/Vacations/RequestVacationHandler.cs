@@ -36,6 +36,20 @@ public sealed class RequestVacationHandler
             return new RequestVacationResponse(false, null, ["Employee was not found."]);
         }
 
+        var hasOverlappingRequest = await _vacationRequestRepository.HasOverlappingRequestForEmployeeAsync(
+            employee.Id,
+            request.StartDate,
+            request.EndDate,
+            cancellationToken);
+
+        if (hasOverlappingRequest)
+        {
+            return new RequestVacationResponse(
+                false,
+                null,
+                ["Employee already has a pending or approved vacation request in this period."]);
+        }
+
         var department = await _departmentRepository.GetByIdAsync(employee.DepartmentId, cancellationToken);
 
         if (department is null)

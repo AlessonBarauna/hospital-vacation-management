@@ -109,4 +109,21 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
         return await _dbContext.VacationRequests
             .FirstOrDefaultAsync(vacationRequest => vacationRequest.Id == id, cancellationToken);
     }
+
+    public async Task<bool> HasOverlappingRequestForEmployeeAsync(
+    Guid employeeId,
+    DateOnly startDate,
+    DateOnly endDate,
+    CancellationToken cancellationToken)
+    {
+        return await _dbContext.VacationRequests
+            .Where(vacationRequest => vacationRequest.EmployeeId == employeeId)
+            .Where(vacationRequest =>
+                vacationRequest.Status == VacationRequestStatus.Pending ||
+                vacationRequest.Status == VacationRequestStatus.Approved)
+            .AnyAsync(vacationRequest =>
+                vacationRequest.StartDate <= endDate &&
+                startDate <= vacationRequest.EndDate,
+                cancellationToken);
+    }
 }
