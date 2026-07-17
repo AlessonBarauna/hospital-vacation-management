@@ -356,3 +356,7 @@ app.MapGet("/vacation-requests/{id:guid}", async (
 .WithOpenApi();
 
 app.Run();
+
+public partial class Program
+{
+}
