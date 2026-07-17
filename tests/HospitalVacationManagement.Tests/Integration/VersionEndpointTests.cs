@@ -1,15 +1,14 @@
 using System.Net.Http.Json;
 using HospitalVacationManagement.Application.System;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace HospitalVacationManagement.Tests.Integration;
 
-public sealed class VersionEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class VersionEndpointTests : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory _factory;
 
-    public VersionEndpointTests(WebApplicationFactory<Program> factory)
+    public VersionEndpointTests(CustomWebApplicationFactory factory)
     {
         _factory = factory;
     }
@@ -23,7 +22,7 @@ public sealed class VersionEndpointTests : IClassFixture<WebApplicationFactory<P
 
         Assert.NotNull(response);
         Assert.Equal("Hospital Vacation Management API", response.Application);
-        Assert.False(string.IsNullOrWhiteSpace(response.Environment));
+        Assert.Equal("Testing", response.Environment);
         Assert.False(string.IsNullOrWhiteSpace(response.Version));
     }
 }
