@@ -10,6 +10,7 @@ using HospitalVacationManagement.Application.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using HospitalVacationManagement.Application.Departments;
+using HospitalVacationManagement.Application.Employees;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -263,6 +264,67 @@ app.MapGet("/departments/{id:guid}", async (
         : Results.Ok(response);
 })
 .WithName("GetDepartmentById")
+.WithOpenApi();
+
+app.MapPost("/employees", async (
+    CreateEmployeeRequest request,
+    IValidator<CreateEmployeeRequest> validator,
+    CreateEmployeeHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(new ApiErrorResponse(
+            validationResult.Errors.Select(error => error.ErrorMessage).ToList()));
+    }
+
+    var response = await handler.HandleAsync(request, cancellationToken);
+
+    return response is null
+        ? Results.BadRequest(new ApiErrorResponse(["Department was not found."]))
+        : Results.Created($"/employees/{response.Id}", response);
+})
+.WithName("CreateEmployee")
+.WithOpenApi()
+.RequireAuthorization();
+
+app.MapGet("/employees", async (
+    ListEmployeesHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(cancellationToken);
+
+    return Results.Ok(response);
+})
+.WithName("ListEmployees")
+.WithOpenApi();
+
+app.MapGet("/employees/{id:guid}", async (
+    Guid id,
+    GetEmployeeByIdHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(id, cancellationToken);
+
+    return response is null
+        ? Results.NotFound()
+        : Results.Ok(response);
+})
+.WithName("GetEmployeeById")
+.WithOpenApi();
+
+app.MapGet("/departments/{departmentId:guid}/employees", async (
+    Guid departmentId,
+    ListEmployeesByDepartmentHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(departmentId, cancellationToken);
+
+    return Results.Ok(response);
+})
+.WithName("ListEmployeesByDepartment")
 .WithOpenApi();
 
 app.Run();

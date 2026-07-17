@@ -3,6 +3,7 @@ using HospitalVacationManagement.Domain.Vacations;
 using Microsoft.Extensions.DependencyInjection;
 using HospitalVacationManagement.Application.Authentication;
 using HospitalVacationManagement.Application.Departments;
+using HospitalVacationManagement.Application.Employees;
 using FluentValidation;
 
 namespace HospitalVacationManagement.Application;
@@ -23,6 +24,10 @@ public static class DependencyInjection
         services.AddScoped<CreateDepartmentHandler>();
         services.AddScoped<ListDepartmentsHandler>();
         services.AddScoped<GetDepartmentByIdHandler>();
+        services.AddScoped<CreateEmployeeHandler>();
+        services.AddScoped<ListEmployeesHandler>();
+        services.AddScoped<GetEmployeeByIdHandler>();
+        services.AddScoped<ListEmployeesByDepartmentHandler>();
 
         return services;
     }

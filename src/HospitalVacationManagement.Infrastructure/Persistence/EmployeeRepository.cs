@@ -26,6 +26,19 @@ public sealed class EmployeeRepository : IEmployeeRepository
     {
         return await _dbContext.Employees
             .Where(employee => employee.DepartmentId == departmentId)
+            .OrderBy(employee => employee.FullName)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<Employee>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await _dbContext.Employees
+            .OrderBy(employee => employee.FullName)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task AddAsync(Employee employee, CancellationToken cancellationToken)
+    {
+        await _dbContext.Employees.AddAsync(employee, cancellationToken);
     }
 }
