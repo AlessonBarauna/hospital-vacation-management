@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IVacationRequestRepository, VacationRequestRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddHostedService<DatabaseMigrationService>();
 
         return services;
     }
