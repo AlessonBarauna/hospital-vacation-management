@@ -19,4 +19,16 @@ public sealed class DepartmentRepository : IDepartmentRepository
         return await _dbContext.Departments
             .FirstOrDefaultAsync(department => department.Id == id, cancellationToken);
     }
+
+    public async Task<IReadOnlyCollection<Department>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await _dbContext.Departments
+            .OrderBy(department => department.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task AddAsync(Department department, CancellationToken cancellationToken)
+    {
+        await _dbContext.Departments.AddAsync(department, cancellationToken);
+    }
 }
