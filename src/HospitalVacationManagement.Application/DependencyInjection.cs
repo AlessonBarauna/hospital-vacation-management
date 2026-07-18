@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<UpdateUserHandler>();
         services.AddScoped<ChangeUserPasswordHandler>();
         services.AddScoped<DeactivateUserHandler>();
+        services.AddScoped<ActivateUserHandler>();
 
         return services;
     }

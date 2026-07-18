@@ -479,6 +479,19 @@ app.MapPut("/users/{id:guid}/deactivate", async (
 })
 .RequireAuthorization("AdminOnly");
 
+app.MapPut("/users/{id:guid}/activate", async (
+    Guid id,
+    ActivateUserHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var userWasActivated = await handler.HandleAsync(id, cancellationToken);
+
+    return userWasActivated
+        ? Results.NoContent()
+        : Results.NotFound();
+})
+.RequireAuthorization("AdminOnly");
+
 app.Run();
 
 public partial class Program
