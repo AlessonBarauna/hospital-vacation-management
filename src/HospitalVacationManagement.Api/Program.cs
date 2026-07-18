@@ -422,6 +422,28 @@ app.MapGet("/users/{id:guid}", async (
 })
 .RequireAuthorization("AdminOnly");
 
+app.MapPut("/users/{id:guid}", async (
+    Guid id,
+    UpdateUserRequest request,
+    IValidator<UpdateUserRequest> validator,
+    UpdateUserHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    var response = await handler.HandleAsync(id, request, cancellationToken);
+
+    return response is null
+        ? Results.NotFound()
+        : Results.Ok(response);
+})
+.RequireAuthorization("AdminOnly");
+
 app.Run();
 
 public partial class Program

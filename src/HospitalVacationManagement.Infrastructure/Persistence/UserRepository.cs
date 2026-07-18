@@ -40,4 +40,9 @@ public sealed class UserRepository : IUserRepository
     {
         await _dbContext.Users.AddAsync(user, cancellationToken);
     }
+
+    public void Update(User user)
+    {
+        _dbContext.Users.Update(user);
+    }
 }

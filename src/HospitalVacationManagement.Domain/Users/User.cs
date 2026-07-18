@@ -16,13 +16,23 @@ public sealed class User
         Role = role;
     }
 
+    public void UpdateProfile(
+        string fullName,
+        string email,
+        UserRole role)
+    {
+        FullName = fullName;
+        Email = email;
+        Role = role;
+    }
+
     public Guid Id { get; }
 
-    public string FullName { get; }
+    public string FullName { get; private set; }
 
-    public string Email { get; }
+    public string Email { get; private set; }
 
-    public string PasswordHash { get; }
+    public string PasswordHash { get;}
 
-    public UserRole Role { get; }
+    public UserRole Role { get;private set; }
 }
