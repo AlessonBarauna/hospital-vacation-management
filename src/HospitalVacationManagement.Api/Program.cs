@@ -146,6 +146,7 @@ app.MapPost("/auth/login", async (
     }
 
     var loginResponse = jwtTokenGenerator.Generate(
+    user.Id,
     user.Email,
     user.Role.ToString());
 
@@ -481,9 +482,9 @@ app.MapPut("/users/{id:guid}/deactivate", async (
         return Results.NotFound();
     }
 
-    var currentUserEmail = currentUser.FindFirstValue(ClaimTypes.Email);
+    var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
 
-    if (currentUserEmail == userToDeactivate.Email)
+    if (currentUserId == id.ToString())
     {
         return Results.BadRequest("You cannot deactivate your own user.");
     }

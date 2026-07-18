@@ -15,15 +15,15 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
         _options = options.Value;
     }
 
-    public LoginResponse Generate(string email, string role)
+    public LoginResponse Generate(Guid userId, string email, string role)
     {
         var expiresAt = DateTime.UtcNow.AddMinutes(_options.ExpirationInMinutes);
 
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, email),
-            new(ClaimTypes.Email, email),
-            new(ClaimTypes.Role, role)
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Role, role)
         };
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));

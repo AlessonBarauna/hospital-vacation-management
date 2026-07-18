@@ -1,6 +1,7 @@
 namespace HospitalVacationManagement.Application.Authentication;
+using System;
 
 public interface IJwtTokenGenerator
 {
-    LoginResponse Generate(string email, string role);
+    LoginResponse Generate(Guid userId, string email, string role);
 }
