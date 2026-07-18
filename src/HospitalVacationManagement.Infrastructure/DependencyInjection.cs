@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddHostedService<DatabaseMigrationService>();
+        services.AddHostedService<DatabaseSeedService>();
         
 
         return services;
