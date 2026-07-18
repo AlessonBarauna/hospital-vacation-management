@@ -14,6 +14,7 @@ using HospitalVacationManagement.Application.Employees;
 using HospitalVacationManagement.Application.System;
 using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Application.Users;
+using System.Security.Claims;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -468,10 +469,26 @@ app.MapPut("/users/{id:guid}/password", async (
 
 app.MapPut("/users/{id:guid}/deactivate", async (
     Guid id,
-    DeactivateUserHandler handler,
+    ClaimsPrincipal currentUser,
+    GetUserByIdHandler getUserByIdHandler,
+    DeactivateUserHandler deactivateUserHandler,
     CancellationToken cancellationToken) =>
 {
-    var userWasDeactivated = await handler.HandleAsync(id, cancellationToken);
+    var userToDeactivate = await getUserByIdHandler.HandleAsync(id, cancellationToken);
+
+    if (userToDeactivate is null)
+    {
+        return Results.NotFound();
+    }
+
+    var currentUserEmail = currentUser.FindFirstValue(ClaimTypes.Email);
+
+    if (currentUserEmail == userToDeactivate.Email)
+    {
+        return Results.BadRequest("You cannot deactivate your own user.");
+    }
+
+    var userWasDeactivated = await deactivateUserHandler.HandleAsync(id, cancellationToken);
 
     return userWasDeactivated
         ? Results.NoContent()
