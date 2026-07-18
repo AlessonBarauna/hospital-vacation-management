@@ -15,7 +15,7 @@ namespace HospitalVacationManagement.Infrastructure.Data.Migrations
                 table: "users",
                 type: "boolean",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
         }
 
         /// <inheritdoc />
