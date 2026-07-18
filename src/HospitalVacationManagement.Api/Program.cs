@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using HospitalVacationManagement.Application.Departments;
 using HospitalVacationManagement.Application.Employees;
 using HospitalVacationManagement.Application.System;
+using HospitalVacationManagement.Application.Abstractions;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -114,22 +115,33 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapPost("/auth/login", (
+app.MapPost("/auth/login", async (
     LoginRequest request,
-    IJwtTokenGenerator jwtTokenGenerator) =>
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
+    IJwtTokenGenerator jwtTokenGenerator,
+    CancellationToken cancellationToken) =>
 {
-    if (!string.Equals(request.Email, "admin@hospital.com", StringComparison.OrdinalIgnoreCase)
-        || request.Password != "Admin@123")
+    var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
+
+    if (user is null)
     {
         return Results.Unauthorized();
     }
 
-    var response = jwtTokenGenerator.Generate(request.Email, "Admin");
+    var passwordIsValid = passwordHasher.Verify(request.Password, user.PasswordHash);
 
-    return Results.Ok(response);
-})
-.WithName("Login")
-.WithOpenApi();
+    if (!passwordIsValid)
+    {
+        return Results.Unauthorized();
+    }
+
+    var loginResponse = jwtTokenGenerator.Generate(
+    user.Email,
+    user.Role.ToString());
+
+    return Results.Ok(loginResponse);
+});
 
 app.MapGet("/vacation-requests", async (
     VacationRequestStatus? status,
