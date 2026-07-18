@@ -14,6 +14,7 @@ public sealed class User
         Email = email;
         PasswordHash = passwordHash;
         Role = role;
+        IsActive = true;
     }
 
     public void UpdateProfile(
@@ -32,13 +33,20 @@ public sealed class User
         PasswordHash = passwordHash;
     }
 
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
+
+    public void Activate()
+    {
+        IsActive = true;
+    }
+
     public Guid Id { get; }
-
     public string FullName { get; private set; }
-
     public string Email { get; private set; }
-
     public string PasswordHash { get; private set; }
-
-    public UserRole Role { get;private set; }
+    public UserRole Role { get; private set; }
+    public bool IsActive { get; private set; }
 }

@@ -48,6 +48,7 @@ public sealed class UpdateUserHandler
             user.Id,
             user.FullName,
             user.Email,
-            user.Role);
+            user.Role,
+            user.IsActive);
     }
 }

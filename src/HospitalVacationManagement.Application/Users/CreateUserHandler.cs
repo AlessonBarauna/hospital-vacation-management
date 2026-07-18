@@ -46,6 +46,7 @@ public sealed class CreateUserHandler
             user.Id,
             user.FullName,
             user.Email,
-            user.Role);
+            user.Role,
+            user.IsActive);
     }
 }

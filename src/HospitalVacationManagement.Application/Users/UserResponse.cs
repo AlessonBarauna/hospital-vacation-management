@@ -6,4 +6,5 @@ public sealed record UserResponse(
     Guid Id,
     string FullName,
     string Email,
-    UserRole Role);
+    UserRole Role,
+    bool IsActive);

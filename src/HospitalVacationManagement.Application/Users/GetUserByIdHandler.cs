@@ -26,7 +26,8 @@ public sealed class GetUserByIdHandler
             user.Id,
             user.FullName,
             user.Email,
-            user.Role
+            user.Role,
+            user.IsActive
         );
     }
 }

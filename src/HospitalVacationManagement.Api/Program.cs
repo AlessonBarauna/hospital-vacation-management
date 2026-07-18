@@ -132,7 +132,7 @@ app.MapPost("/auth/login", async (
 {
     var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
-    if (user is null)
+    if (user is null || !user.IsActive)
     {
         return Results.Unauthorized();
     }
@@ -461,6 +461,19 @@ app.MapPut("/users/{id:guid}/password", async (
     var passwordWasChanged = await handler.HandleAsync(id, request, cancellationToken);
 
     return passwordWasChanged
+        ? Results.NoContent()
+        : Results.NotFound();
+})
+.RequireAuthorization("AdminOnly");
+
+app.MapPut("/users/{id:guid}/deactivate", async (
+    Guid id,
+    DeactivateUserHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var userWasDeactivated = await handler.HandleAsync(id, cancellationToken);
+
+    return userWasDeactivated
         ? Results.NoContent()
         : Results.NotFound();
 })

@@ -21,7 +21,8 @@ public sealed class ListUsersHandler
                 user.Id,
                 user.FullName,
                 user.Email,
-                user.Role))
+                user.Role,
+                user.IsActive))
             .ToList();
     }
 }
