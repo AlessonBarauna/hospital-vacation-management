@@ -382,9 +382,17 @@ app.MapGet("/vacation-requests/{id:guid}", async (
 
 app.MapPost("/users", async (
     CreateUserRequest request,
+    IValidator<CreateUserRequest> validator,
     CreateUserHandler handler,
     CancellationToken cancellationToken) =>
 {
+    var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
     var response = await handler.HandleAsync(request, cancellationToken);
 
     return Results.Created($"/users/{response.Id}", response);
