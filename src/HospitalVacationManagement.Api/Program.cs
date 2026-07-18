@@ -444,6 +444,28 @@ app.MapPut("/users/{id:guid}", async (
 })
 .RequireAuthorization("AdminOnly");
 
+app.MapPut("/users/{id:guid}/password", async (
+    Guid id,
+    ChangeUserPasswordRequest request,
+    IValidator<ChangeUserPasswordRequest> validator,
+    ChangeUserPasswordHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    var passwordWasChanged = await handler.HandleAsync(id, request, cancellationToken);
+
+    return passwordWasChanged
+        ? Results.NoContent()
+        : Results.NotFound();
+})
+.RequireAuthorization("AdminOnly");
+
 app.Run();
 
 public partial class Program

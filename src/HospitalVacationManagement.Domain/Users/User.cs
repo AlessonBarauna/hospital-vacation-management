@@ -26,13 +26,19 @@ public sealed class User
         Role = role;
     }
 
+    public void ChangePassword(
+        string passwordHash)
+    {
+        PasswordHash = passwordHash;
+    }
+
     public Guid Id { get; }
 
     public string FullName { get; private set; }
 
     public string Email { get; private set; }
 
-    public string PasswordHash { get;}
+    public string PasswordHash { get; private set; }
 
     public UserRole Role { get;private set; }
 }
