@@ -124,6 +124,27 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapGet("/me", async (
+    ClaimsPrincipal currentUser,
+    GetCurrentUserHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (!Guid.TryParse(currentUserId, out var userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    var response = await handler.HandleAsync(userId, cancellationToken);
+
+    return response is null
+        ? Results.NotFound()
+        : Results.Ok(response);
+})
+.RequireAuthorization();
+
+
 app.MapPost("/auth/login", async (
     LoginRequest request,
     IUserRepository userRepository,
