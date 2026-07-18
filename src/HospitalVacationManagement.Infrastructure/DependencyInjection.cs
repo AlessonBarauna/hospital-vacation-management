@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IVacationRequestRepository, VacationRequestRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddHostedService<DatabaseMigrationService>();
         
 
