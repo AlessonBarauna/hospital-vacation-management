@@ -83,7 +83,14 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("Admin"));
+
+    options.AddPolicy("ManagerOrAdmin", policy =>
+        policy.RequireRole("Manager", "Admin"));
+});
 
 var app = builder.Build();
 
@@ -217,7 +224,7 @@ app.MapPut("/vacation-requests/{id:guid}/approve", async (
 })
 .WithName("ApproveVacationRequest")
 .WithOpenApi()
-.RequireAuthorization();
+.RequireAuthorization("ManagerOrAdmin");
 
 app.MapPut("/vacation-requests/{id:guid}/reject", async (
     Guid id,
@@ -232,7 +239,7 @@ app.MapPut("/vacation-requests/{id:guid}/reject", async (
 })
 .WithName("RejectVacationRequest")
 .WithOpenApi()
-.RequireAuthorization();
+.RequireAuthorization("ManagerOrAdmin");
 
 app.MapPut("/vacation-requests/{id:guid}/cancel", async (
     Guid id,
@@ -269,7 +276,7 @@ app.MapPost("/departments", async (
 })
 .WithName("CreateDepartment")
 .WithOpenApi()
-.RequireAuthorization();
+.RequireAuthorization("AdminOnly");
 
 app.MapGet("/departments", async (
     ListDepartmentsHandler handler,
@@ -318,7 +325,7 @@ app.MapPost("/employees", async (
 })
 .WithName("CreateEmployee")
 .WithOpenApi()
-.RequireAuthorization();
+.RequireAuthorization("AdminOnly");
 
 app.MapGet("/employees", async (
     ListEmployeesHandler handler,
@@ -369,7 +376,8 @@ app.MapGet("/vacation-requests/{id:guid}", async (
         : Results.Ok(response);
 })
 .WithName("GetVacationRequestById")
-.WithOpenApi();
+.WithOpenApi()
+.RequireAuthorization();
 
 app.Run();
 
