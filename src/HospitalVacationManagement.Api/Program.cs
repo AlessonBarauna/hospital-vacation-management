@@ -13,6 +13,7 @@ using HospitalVacationManagement.Application.Departments;
 using HospitalVacationManagement.Application.Employees;
 using HospitalVacationManagement.Application.System;
 using HospitalVacationManagement.Application.Abstractions;
+using HospitalVacationManagement.Application.Users;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -378,6 +379,17 @@ app.MapGet("/vacation-requests/{id:guid}", async (
 .WithName("GetVacationRequestById")
 .WithOpenApi()
 .RequireAuthorization();
+
+app.MapPost("/users", async (
+    CreateUserRequest request,
+    CreateUserHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(request, cancellationToken);
+
+    return Results.Created($"/users/{response.Id}", response);
+})
+.RequireAuthorization("AdminOnly");
 
 app.Run();
 

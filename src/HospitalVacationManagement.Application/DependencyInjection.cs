@@ -5,6 +5,7 @@ using HospitalVacationManagement.Application.Authentication;
 using HospitalVacationManagement.Application.Departments;
 using HospitalVacationManagement.Application.Employees;
 using FluentValidation;
+using HospitalVacationManagement.Application.Users;
 
 namespace HospitalVacationManagement.Application;
 
@@ -29,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<GetEmployeeByIdHandler>();
         services.AddScoped<ListEmployeesByDepartmentHandler>();
         services.AddScoped<GetVacationRequestByIdHandler>();
+        services.AddScoped<CreateUserHandler>();
 
         return services;
     }
