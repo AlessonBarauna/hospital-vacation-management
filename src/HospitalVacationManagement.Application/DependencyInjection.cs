@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<ListEmployeesByDepartmentHandler>();
         services.AddScoped<GetVacationRequestByIdHandler>();
         services.AddScoped<CreateUserHandler>();
+        services.AddScoped<ListUsersHandler>();
 
         return services;
     }

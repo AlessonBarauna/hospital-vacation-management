@@ -14,6 +14,14 @@ public sealed class UserRepository : IUserRepository
         _dbContext = dbContext;
     }
 
+    public async Task<IReadOnlyCollection<User>> ListAsync(CancellationToken cancellationToken = default)
+{
+    return await _dbContext.Users
+        .AsNoTracking()
+        .OrderBy(user => user.FullName)
+        .ToListAsync(cancellationToken);
+}
+
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return _dbContext.Users

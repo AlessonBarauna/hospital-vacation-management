@@ -399,6 +399,16 @@ app.MapPost("/users", async (
 })
 .RequireAuthorization("AdminOnly");
 
+app.MapGet("/users", async (
+    ListUsersHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(cancellationToken);
+
+    return Results.Ok(response);
+})
+.RequireAuthorization("AdminOnly");
+
 app.Run();
 
 public partial class Program
