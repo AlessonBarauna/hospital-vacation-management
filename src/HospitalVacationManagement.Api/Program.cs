@@ -409,6 +409,19 @@ app.MapGet("/users", async (
 })
 .RequireAuthorization("AdminOnly");
 
+app.MapGet("/users/{id:guid}", async (
+    Guid id,
+    GetUserByIdHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var response = await handler.HandleAsync(id, cancellationToken);
+
+    return response is null
+        ? Results.NotFound()
+        : Results.Ok(response);
+})
+.RequireAuthorization("AdminOnly");
+
 app.Run();
 
 public partial class Program
