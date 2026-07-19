@@ -1,5 +1,6 @@
 using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Application.Authentication;
+using HospitalVacationManagement.Api.Errors;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -18,7 +19,7 @@ public static class AuthEndpoints
 
             if (user is null || !user.IsActive)
             {
-                return Results.Unauthorized();
+                return ApiErrors.Unauthorized("Invalid email or password.");
             }
 
             var passwordIsValid = passwordHasher.Verify(
@@ -27,7 +28,7 @@ public static class AuthEndpoints
 
             if (!passwordIsValid)
             {
-                return Results.Unauthorized();
+                return ApiErrors.Unauthorized("Invalid email or password.");
             }
 
             var loginResponse = jwtTokenGenerator.Generate(

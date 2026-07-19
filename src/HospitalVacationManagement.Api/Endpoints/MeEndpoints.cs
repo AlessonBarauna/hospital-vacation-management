@@ -1,6 +1,7 @@
 using FluentValidation;
 using HospitalVacationManagement.Application.Users;
 using System.Security.Claims;
+using HospitalVacationManagement.Api.Errors;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -17,13 +18,13 @@ public static class MeEndpoints
 
             if (!Guid.TryParse(currentUserId, out var userId))
             {
-                return Results.Unauthorized();
+                return ApiErrors.Unauthorized();
             }
 
             var response = await handler.HandleAsync(userId, cancellationToken);
 
             return response is null
-                ? Results.NotFound()
+                ? ApiErrors.NotFound()
                 : Results.Ok(response);
         })
         .RequireAuthorization();
@@ -55,7 +56,7 @@ public static class MeEndpoints
             {
                 ChangeOwnPasswordResult.Success => Results.NoContent(),
                 ChangeOwnPasswordResult.UserNotFound => Results.NotFound(),
-                ChangeOwnPasswordResult.InvalidCurrentPassword => Results.BadRequest("Current password is invalid."),
+                ChangeOwnPasswordResult.InvalidCurrentPassword => ApiErrors.BadRequest("Current password is invalid."),
                 _ => Results.BadRequest()
             };
         })

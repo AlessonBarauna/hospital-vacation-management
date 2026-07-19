@@ -1,6 +1,7 @@
 using FluentValidation;
 using HospitalVacationManagement.Application.Users;
 using System.Security.Claims;
+using HospitalVacationManagement.Api.Errors;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -45,7 +46,7 @@ public static class UserEndpoints
             var response = await handler.HandleAsync(id, cancellationToken);
 
             return response is null
-                ? Results.NotFound()
+                ? ApiErrors.NotFound()
                 : Results.Ok(response);
         })
         .RequireAuthorization("AdminOnly");
@@ -67,7 +68,7 @@ public static class UserEndpoints
             var response = await handler.HandleAsync(id, request, cancellationToken);
 
             return response is null
-                ? Results.NotFound()
+                ? ApiErrors.NotFound()
                 : Results.Ok(response);
         })
         .RequireAuthorization("AdminOnly");
@@ -90,7 +91,7 @@ public static class UserEndpoints
 
             return passwordWasChanged
                 ? Results.NoContent()
-                : Results.NotFound();
+                : ApiErrors.NotFound();
         })
         .RequireAuthorization("AdminOnly");
 
@@ -104,14 +105,14 @@ public static class UserEndpoints
 
             if (currentUserId == id.ToString())
             {
-                return Results.BadRequest("You cannot deactivate your own user.");
+                return ApiErrors.BadRequest("You cannot deactivate your own user.");
             }
 
             var userWasDeactivated = await deactivateUserHandler.HandleAsync(id, cancellationToken);
 
             return userWasDeactivated
                 ? Results.NoContent()
-                : Results.NotFound();
+                : ApiErrors.NotFound();
         })
         .RequireAuthorization("AdminOnly");
 
@@ -124,7 +125,7 @@ public static class UserEndpoints
 
             return userWasActivated
                 ? Results.NoContent()
-                : Results.NotFound();
+                : ApiErrors.NotFound();
         })
         .RequireAuthorization("AdminOnly");
 
