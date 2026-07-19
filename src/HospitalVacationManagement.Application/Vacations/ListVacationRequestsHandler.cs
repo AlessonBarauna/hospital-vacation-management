@@ -80,6 +80,8 @@ public sealed class ListVacationRequestsHandler
                 employee.SeniorityLevel,
                 vacationRequest.StartDate,
                 vacationRequest.EndDate,
+                vacationRequest.CreatedAt,
+                vacationRequest.UpdatedAt,
                 vacationRequest.Status));
         }
 

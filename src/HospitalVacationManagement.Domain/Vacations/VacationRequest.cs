@@ -14,6 +14,7 @@ public sealed class VacationRequest
         StartDate = startDate;
         EndDate = endDate;
         Status = status;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public void Approve()
@@ -24,6 +25,7 @@ public sealed class VacationRequest
         }
 
         Status = VacationRequestStatus.Approved;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void Reject()
@@ -34,6 +36,7 @@ public sealed class VacationRequest
         }
 
         Status = VacationRequestStatus.Rejected;
+        UpdatedAt = DateTime.UtcNow;
 
     }
 
@@ -50,6 +53,7 @@ public sealed class VacationRequest
         }
 
         Status = VacationRequestStatus.Cancelled;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public Guid Id { get; }
@@ -57,6 +61,8 @@ public sealed class VacationRequest
     public DateOnly StartDate { get; }
     public DateOnly EndDate { get; }
     public VacationRequestStatus Status { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
 
     public bool Overlaps(DateOnly startDate, DateOnly endDate)
     {

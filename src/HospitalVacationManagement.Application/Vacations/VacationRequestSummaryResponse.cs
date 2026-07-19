@@ -13,4 +13,6 @@ public sealed record VacationRequestSummaryResponse(
     SeniorityLevel SeniorityLevel,
     DateOnly StartDate,
     DateOnly EndDate,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt,
     VacationRequestStatus Status);
