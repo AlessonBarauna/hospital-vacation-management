@@ -105,6 +105,7 @@ app.MapUserEndpoints();
 app.MapMeEndpoints();
 app.MapAuthEndpoints();
 app.MapDepartmentEndpoints();
+app.MapEmployeeEndpoints();
 
 app.MapGet("/health/live", () => Results.Ok("Healthy"))
     .WithName("Liveness")
@@ -234,67 +235,6 @@ app.MapPut("/vacation-requests/{id:guid}/cancel", async (
 .WithName("CancelVacationRequest")
 .WithOpenApi()
 .RequireAuthorization();
-
-app.MapPost("/employees", async (
-    CreateEmployeeRequest request,
-    IValidator<CreateEmployeeRequest> validator,
-    CreateEmployeeHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-    if (!validationResult.IsValid)
-    {
-        return Results.BadRequest(new ApiErrorResponse(
-            validationResult.Errors.Select(error => error.ErrorMessage).ToList()));
-    }
-
-    var response = await handler.HandleAsync(request, cancellationToken);
-
-    return response is null
-        ? Results.BadRequest(new ApiErrorResponse(["Department was not found."]))
-        : Results.Created($"/employees/{response.Id}", response);
-})
-.WithName("CreateEmployee")
-.WithOpenApi()
-.RequireAuthorization("AdminOnly");
-
-app.MapGet("/employees", async (
-    ListEmployeesHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var response = await handler.HandleAsync(cancellationToken);
-
-    return Results.Ok(response);
-})
-.WithName("ListEmployees")
-.WithOpenApi();
-
-app.MapGet("/employees/{id:guid}", async (
-    Guid id,
-    GetEmployeeByIdHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var response = await handler.HandleAsync(id, cancellationToken);
-
-    return response is null
-        ? Results.NotFound()
-        : Results.Ok(response);
-})
-.WithName("GetEmployeeById")
-.WithOpenApi();
-
-app.MapGet("/departments/{departmentId:guid}/employees", async (
-    Guid departmentId,
-    ListEmployeesByDepartmentHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var response = await handler.HandleAsync(departmentId, cancellationToken);
-
-    return Results.Ok(response);
-})
-.WithName("ListEmployeesByDepartment")
-.WithOpenApi();
 
 app.MapGet("/vacation-requests/{id:guid}", async (
     Guid id,
