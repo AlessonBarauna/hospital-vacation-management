@@ -100,30 +100,17 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapHealthChecks("/health");
 app.MapUserEndpoints();
 app.MapMeEndpoints();
 app.MapAuthEndpoints();
 app.MapDepartmentEndpoints();
 app.MapEmployeeEndpoints();
 app.MapVacationRequestEndpoints();
+app.MapSystemEndpoints();
 
 app.MapGet("/health/live", () => Results.Ok("Healthy"))
     .WithName("Liveness")
     .WithOpenApi();
-
-app.MapGet("/version", (IHostEnvironment environment) =>
-{
-    var response = new VersionResponse(
-        "Hospital Vacation Management API",
-        environment.EnvironmentName,
-        "1.0.0",
-        DateTime.UtcNow);
-
-    return Results.Ok(response);
-})
-.WithName("GetVersion")
-.WithOpenApi();
 
 if (app.Environment.IsDevelopment())
 {
