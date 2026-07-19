@@ -1,17 +1,8 @@
 using HospitalVacationManagement.Application;
-using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Infrastructure;
-using HospitalVacationManagement.Domain.Vacations;
 using FluentValidation;
-using HospitalVacationManagement.Application.Common;
 using Serilog;
 using HospitalVacationManagement.Application.Authentication;
-using HospitalVacationManagement.Application.Departments;
-using HospitalVacationManagement.Application.Employees;
-using HospitalVacationManagement.Application.System;
-using HospitalVacationManagement.Application.Abstractions;
-using HospitalVacationManagement.Application.Users;
-using System.Security.Claims;
 using HospitalVacationManagement.Api.Endpoints;
 using HospitalVacationManagement.Api.Extensions;
 
@@ -48,13 +39,8 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapUserEndpoints();
-app.MapMeEndpoints();
 app.MapAuthEndpoints();
-app.MapDepartmentEndpoints();
-app.MapEmployeeEndpoints();
-app.MapVacationRequestEndpoints();
-app.MapSystemEndpoints();
+app.MapApiEndpoints();
 
 app.MapGet("/health/live", () => Results.Ok("Healthy"))
     .WithName("Liveness")
