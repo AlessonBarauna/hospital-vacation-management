@@ -5,10 +5,7 @@ using HospitalVacationManagement.Domain.Vacations;
 using FluentValidation;
 using HospitalVacationManagement.Application.Common;
 using Serilog;
-using System.Text;
 using HospitalVacationManagement.Application.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using HospitalVacationManagement.Application.Departments;
 using HospitalVacationManagement.Application.Employees;
 using HospitalVacationManagement.Application.System;
@@ -43,32 +40,8 @@ var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 var jwtSecretKey = builder.Configuration["Jwt:SecretKey"];
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSecretKey!))
-        };
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy =>
-        policy.RequireRole("Admin"));
-
-    options.AddPolicy("ManagerOrAdmin", policy =>
-        policy.RequireRole("Manager", "Admin"));
-});
-
+builder.Services.AddApiAuthentication(builder.Configuration);
+builder.Services.AddApiAuthorization();
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
