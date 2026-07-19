@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using HospitalVacationManagement.Application.Authentication;
 
 namespace HospitalVacationManagement.Api.Extensions;
 
@@ -10,10 +11,17 @@ public static class AuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var jwtSecret = configuration["Jwt:Secret"]
-            ?? throw new InvalidOperationException("JWT secret was not configured.");
+        var jwtOptions = configuration
+    .GetSection(JwtOptions.SectionName)
+    .Get<JwtOptions>()
+    ?? throw new InvalidOperationException("JWT options were not configured.");
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
+        if (string.IsNullOrWhiteSpace(jwtOptions.SecretKey))
+        {
+            throw new InvalidOperationException("JWT SecretKey was not configured.");
+        }
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -21,10 +29,10 @@ public static class AuthenticationExtensions
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidIssuer = jwtOptions.Issuer,
 
                     ValidateAudience = true,
-                    ValidAudience = configuration["Jwt:Audience"],
+                    ValidAudience = jwtOptions.Audience,
 
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = key,
