@@ -38,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<DeactivateUserHandler>();
         services.AddScoped<ActivateUserHandler>();
         services.AddScoped<GetCurrentUserHandler>();
+        services.AddScoped<ChangeOwnPasswordHandler>();
 
         return services;
     }

@@ -533,9 +533,9 @@ app.MapPut("/users/{id:guid}/activate", async (
 
 app.MapPut("/me/password", async (
     ClaimsPrincipal currentUser,
-    ChangeUserPasswordRequest request,
-    IValidator<ChangeUserPasswordRequest> validator,
-    ChangeUserPasswordHandler handler,
+    ChangeOwnPasswordRequest request,
+    IValidator<ChangeOwnPasswordRequest> validator,
+    ChangeOwnPasswordHandler handler,
     CancellationToken cancellationToken) =>
 {
     var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -552,14 +552,15 @@ app.MapPut("/me/password", async (
         return Results.ValidationProblem(validationResult.ToDictionary());
     }
 
-    var passwordWasChanged = await handler.HandleAsync(
-        userId,
-        request,
-        cancellationToken);
+    var result = await handler.HandleAsync(userId, request, cancellationToken);
 
-    return passwordWasChanged
-        ? Results.NoContent()
-        : Results.NotFound();
+    return result switch
+    {
+        ChangeOwnPasswordResult.Success => Results.NoContent(),
+        ChangeOwnPasswordResult.UserNotFound => Results.NotFound(),
+        ChangeOwnPasswordResult.InvalidCurrentPassword => Results.BadRequest("Current password is invalid."),
+        _ => Results.BadRequest()
+    };
 })
 .RequireAuthorization();
 
