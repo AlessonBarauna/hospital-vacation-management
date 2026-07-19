@@ -1,13 +1,13 @@
-using System.Net;
-using Xunit;
-using System.Net.Http.Json;
 using HospitalVacationManagement.Application.Abstractions;
+using HospitalVacationManagement.Application.Authentication;
+using HospitalVacationManagement.Domain.Users;
 using HospitalVacationManagement.Tests.Fakes;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 using System.Net.Http.Headers;
-using HospitalVacationManagement.Application.Authentication;
-using HospitalVacationManagement.Domain.Users;
+using System.Net.Http.Json;
+using Xunit;
 
 namespace HospitalVacationManagement.Tests.Integration;
 
@@ -80,5 +80,46 @@ public sealed class AuthenticationEndpointTests : IClassFixture<CustomWebApplica
         var response = await client.GetAsync("/users");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+public async Task Login_ShouldReturnToken_WhenCredentialsAreValid()
+{
+    var userRepository = new FakeUserRepository();
+
+    var passwordHasher = _factory.Services.GetRequiredService<IPasswordHasher>();
+
+    var user = new User(
+        Guid.NewGuid(),
+        "Maria Gestora",
+        "maria.gestora@hospital.com",
+        passwordHasher.Hash("Maria@123"),
+        UserRole.Manager);
+
+    await userRepository.AddAsync(user);
+
+    var client = _factory.WithWebHostBuilder(builder =>
+    {
+        builder.ConfigureTestServices(services =>
+        {
+            services.AddScoped<IUserRepository>(_ => userRepository);
+        });
+    })
+    .CreateClient();
+
+    var request = new
+    {
+        Email = "maria.gestora@hospital.com",
+        Password = "Maria@123"
+    };
+
+    var response = await client.PostAsJsonAsync("/auth/login", request);
+
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+    var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+    Assert.NotNull(loginResponse);
+    Assert.False(string.IsNullOrWhiteSpace(loginResponse.AccessToken));
     }
 }
