@@ -1,15 +1,21 @@
 using System.Net;
 using Xunit;
 using System.Net.Http.Json;
+using HospitalVacationManagement.Application.Abstractions;
+using HospitalVacationManagement.Tests.Fakes;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HospitalVacationManagement.Tests.Integration;
 
 public sealed class AuthenticationEndpointTests : IClassFixture<CustomWebApplicationFactory>
 {
+    private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
     public AuthenticationEndpointTests(CustomWebApplicationFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -24,13 +30,30 @@ public sealed class AuthenticationEndpointTests : IClassFixture<CustomWebApplica
     [Fact]
     public async Task Login_ShouldReturnUnauthorized_WhenCredentialsAreInvalid()
     {
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                services.AddScoped<IUserRepository, FakeUserRepository>();
+            });
+        })
+        .CreateClient();
+
         var request = new
         {
             Email = "usuario.inexistente@hospital.com",
             Password = "SenhaErrada@123"
         };
 
-        var response = await _client.PostAsJsonAsync("/auth/login", request);
+        var response = await client.PostAsJsonAsync("/auth/login", request);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetUsers_ShouldReturnUnauthorized_WhenTokenWasNotProvided()
+    {
+        var response = await _client.GetAsync("/users");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }

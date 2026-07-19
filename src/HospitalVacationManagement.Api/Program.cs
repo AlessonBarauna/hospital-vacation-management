@@ -42,7 +42,6 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapAuthEndpoints();
 app.MapApiEndpoints();
 
 app.UseApiSwagger();
