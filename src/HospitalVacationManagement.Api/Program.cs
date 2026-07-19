@@ -106,6 +106,7 @@ app.MapMeEndpoints();
 app.MapAuthEndpoints();
 app.MapDepartmentEndpoints();
 app.MapEmployeeEndpoints();
+app.MapVacationRequestEndpoints();
 
 app.MapGet("/health/live", () => Results.Ok("Healthy"))
     .WithName("Liveness")
@@ -129,127 +130,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.MapGet("/vacation-requests", async (
-    VacationRequestStatus? status,
-    Guid? employeeId,
-    Guid? departmentId,
-    DateOnly? startDate,
-    DateOnly? endDate,
-    int page,
-    int pageSize,
-    IValidator<ListVacationRequestsRequest> validator,
-    ListVacationRequestsHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var request = new ListVacationRequestsRequest(
-        status,
-        employeeId,
-        departmentId,
-        startDate,
-        endDate,
-        page,
-        pageSize);
-
-    var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-    if (!validationResult.IsValid)
-    {
-        return Results.BadRequest(new ApiErrorResponse(
-            validationResult.Errors.Select(error => error.ErrorMessage).ToList()));
-    }
-
-    var response = await handler.HandleAsync(request, cancellationToken);
-
-    return Results.Ok(response);
-})
-.WithName("ListVacationRequests")
-.WithOpenApi()
-.RequireAuthorization();
-
-app.MapPost("/vacation-requests", async (
-    RequestVacationRequest request,
-    IValidator<RequestVacationRequest> validator,
-    RequestVacationHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-    if (!validationResult.IsValid)
-    {
-        return Results.BadRequest(new ApiErrorResponse(
-    validationResult.Errors.Select(error => error.ErrorMessage).ToList()));
-    }
-
-    var response = await handler.HandleAsync(request, cancellationToken);
-
-    return response.IsValid
-        ? Results.Created($"/vacation-requests/{response.VacationRequestId}", response)
-        : Results.BadRequest(response);
-})
-.WithName("RequestVacation")
-.WithOpenApi()
-.RequireAuthorization();
-
-app.MapPut("/vacation-requests/{id:guid}/approve", async (
-    Guid id,
-    ApproveVacationRequestHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var response = await handler.HandleAsync(id, cancellationToken);
-
-    return response.IsSuccess
-        ? Results.NoContent()
-        : Results.BadRequest(response);
-})
-.WithName("ApproveVacationRequest")
-.WithOpenApi()
-.RequireAuthorization("ManagerOrAdmin");
-
-app.MapPut("/vacation-requests/{id:guid}/reject", async (
-    Guid id,
-    RejectVacationRequestHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var response = await handler.HandleAsync(id, cancellationToken);
-
-    return response.IsSuccess
-        ? Results.NoContent()
-        : Results.BadRequest(response);
-})
-.WithName("RejectVacationRequest")
-.WithOpenApi()
-.RequireAuthorization("ManagerOrAdmin");
-
-app.MapPut("/vacation-requests/{id:guid}/cancel", async (
-    Guid id,
-    CancelVacationRequestHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var response = await handler.HandleAsync(id, cancellationToken);
-
-    return response.IsSuccess
-        ? Results.NoContent()
-        : Results.BadRequest(response);
-})
-.WithName("CancelVacationRequest")
-.WithOpenApi()
-.RequireAuthorization();
-
-app.MapGet("/vacation-requests/{id:guid}", async (
-    Guid id,
-    GetVacationRequestByIdHandler handler,
-    CancellationToken cancellationToken) =>
-{
-    var response = await handler.HandleAsync(id, cancellationToken);
-
-    return response is null
-        ? Results.NotFound()
-        : Results.Ok(response);
-})
-.WithName("GetVacationRequestById")
-.WithOpenApi()
-.RequireAuthorization();
 
 app.Run();
 
