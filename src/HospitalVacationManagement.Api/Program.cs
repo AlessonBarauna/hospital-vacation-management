@@ -531,6 +531,38 @@ app.MapPut("/users/{id:guid}/activate", async (
 })
 .RequireAuthorization("AdminOnly");
 
+app.MapPut("/me/password", async (
+    ClaimsPrincipal currentUser,
+    ChangeUserPasswordRequest request,
+    IValidator<ChangeUserPasswordRequest> validator,
+    ChangeUserPasswordHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (!Guid.TryParse(currentUserId, out var userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    var passwordWasChanged = await handler.HandleAsync(
+        userId,
+        request,
+        cancellationToken);
+
+    return passwordWasChanged
+        ? Results.NoContent()
+        : Results.NotFound();
+})
+.RequireAuthorization();
+
 app.Run();
 
 public partial class Program
