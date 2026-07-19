@@ -29,9 +29,7 @@ builder.Host.UseSerilog((context, configuration) =>
 });
 
 builder.Services.AddApiSwagger();
-builder.Services
-    .AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
+builder.Services.AddApiHealthChecks(builder.Configuration);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
