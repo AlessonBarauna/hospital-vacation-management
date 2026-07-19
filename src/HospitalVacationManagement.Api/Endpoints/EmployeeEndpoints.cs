@@ -13,9 +13,11 @@ public static class EmployeeEndpoints
         {
             var response = await handler.HandleAsync(request, cancellationToken);
 
-            return Results.Created($"/employees/{response.Id}", response);
-        })
-        .RequireAuthorization("AdminOnly");
+            return response is null
+        ? Results.BadRequest("Department was not found.")
+        : Results.Created($"/employees/{response.Id}", response);
+})
+.RequireAuthorization("AdminOnly");
 
         app.MapGet("/employees", async (
             ListEmployeesHandler handler,
