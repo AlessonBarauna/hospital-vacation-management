@@ -1,28 +1,30 @@
 using System.Net.Http.Json;
-using HospitalVacationManagement.Application.System;
 using Xunit;
 
 namespace HospitalVacationManagement.Tests.Integration;
 
 public sealed class VersionEndpointTests : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly CustomWebApplicationFactory _factory;
+    private readonly HttpClient _client;
 
     public VersionEndpointTests(CustomWebApplicationFactory factory)
     {
-        _factory = factory;
+        _client = factory.CreateClient();
     }
 
     [Fact]
     public async Task GetVersion_ShouldReturnApplicationVersion()
     {
-        var client = _factory.CreateClient();
-
-        var response = await client.GetFromJsonAsync<VersionResponse>("/version");
+        var response = await _client.GetFromJsonAsync<VersionResponse>("/version");
 
         Assert.NotNull(response);
         Assert.Equal("Hospital Vacation Management API", response.Application);
+        Assert.Equal("1.0.0", response.Version);
         Assert.Equal("Testing", response.Environment);
-        Assert.False(string.IsNullOrWhiteSpace(response.Version));
     }
+
+    private sealed record VersionResponse(
+        string Application,
+        string Version,
+        string Environment);
 }
