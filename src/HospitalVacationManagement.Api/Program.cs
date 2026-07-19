@@ -103,6 +103,7 @@ app.UseAuthorization();
 app.MapHealthChecks("/health");
 app.MapUserEndpoints();
 app.MapMeEndpoints();
+app.MapAuthEndpoints();
 
 app.MapGet("/health/live", () => Results.Ok("Healthy"))
     .WithName("Liveness")
@@ -126,35 +127,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.MapPost("/auth/login", async (
-    LoginRequest request,
-    IUserRepository userRepository,
-    IPasswordHasher passwordHasher,
-    IJwtTokenGenerator jwtTokenGenerator,
-    CancellationToken cancellationToken) =>
-{
-    var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
-
-    if (user is null || !user.IsActive)
-    {
-        return Results.Unauthorized();
-    }
-
-    var passwordIsValid = passwordHasher.Verify(request.Password, user.PasswordHash);
-
-    if (!passwordIsValid)
-    {
-        return Results.Unauthorized();
-    }
-
-    var loginResponse = jwtTokenGenerator.Generate(
-    user.Id,
-    user.Email,
-    user.Role.ToString());
-
-    return Results.Ok(loginResponse);
-});
 
 app.MapGet("/vacation-requests", async (
     VacationRequestStatus? status,
