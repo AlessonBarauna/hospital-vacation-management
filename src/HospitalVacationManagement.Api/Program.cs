@@ -5,6 +5,7 @@ using Serilog;
 using HospitalVacationManagement.Application.Authentication;
 using HospitalVacationManagement.Api.Endpoints;
 using HospitalVacationManagement.Api.Extensions;
+using HospitalVacationManagement.Api.Middlewares;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -36,15 +37,13 @@ builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.AddApiAuthorization();
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapAuthEndpoints();
 app.MapApiEndpoints();
-
-app.MapGet("/health/live", () => Results.Ok("Healthy"))
-    .WithName("Liveness")
-    .WithOpenApi();
 
 app.UseApiSwagger();
 
