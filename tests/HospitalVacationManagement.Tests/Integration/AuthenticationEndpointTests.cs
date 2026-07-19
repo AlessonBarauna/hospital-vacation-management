@@ -5,6 +5,9 @@ using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Tests.Fakes;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Headers;
+using HospitalVacationManagement.Application.Authentication;
+using HospitalVacationManagement.Domain.Users;
 
 namespace HospitalVacationManagement.Tests.Integration;
 
@@ -56,5 +59,26 @@ public sealed class AuthenticationEndpointTests : IClassFixture<CustomWebApplica
         var response = await _client.GetAsync("/users");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetUsers_ShouldReturnForbidden_WhenUserIsNotAdmin()
+    {
+        var tokenGenerator = _factory.Services.GetRequiredService<IJwtTokenGenerator>();
+
+        var loginResponse = tokenGenerator.Generate(
+            Guid.NewGuid(),
+            "employee@hospital.com",
+            UserRole.Employee.ToString());
+
+        var client = _factory.CreateClient();
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            loginResponse.AccessToken);
+
+        var response = await client.GetAsync("/users");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }
