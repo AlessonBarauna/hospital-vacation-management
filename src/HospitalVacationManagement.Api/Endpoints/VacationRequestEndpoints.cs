@@ -3,6 +3,7 @@ using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Domain.Vacations;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using System.Security.Claims;
+using HospitalVacationManagement.Api.Errors;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -135,19 +136,42 @@ public static class VacationRequestEndpoints
         app.MapPut("/vacation-requests/{id:guid}/cancel", async (
             Guid id,
             ClaimsPrincipal currentUser,
-            CancelVacationRequestHandler handler,
+            GetVacationRequestByIdHandler getVacationRequestByIdHandler,
+            CancelVacationRequestHandler cancelVacationRequestHandler,
             CancellationToken cancellationToken) =>
         {
             var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (!Guid.TryParse(currentUserId, out var userId))
             {
-                return Results.Unauthorized();
+                return ApiErrors.Unauthorized();
             }
 
-            var response = await handler.HandleAsync(id, userId, cancellationToken);
+            var currentUserRole = currentUser.FindFirstValue(ClaimTypes.Role);
+
+            var vacationRequest = await getVacationRequestByIdHandler.HandleAsync(id, cancellationToken);
+
+            if (vacationRequest is null)
+            {
+                return ApiErrors.NotFound();
+            }
+
+            var userIsManagerOrAdmin =
+                currentUserRole == "Admin" ||
+                currentUserRole == "Manager";
+
+            var userCreatedVacationRequest =
+                vacationRequest.CreatedByUserId == userId;
+
+            if (!userIsManagerOrAdmin && !userCreatedVacationRequest)
+            {
+                return ApiErrors.Forbidden("You can only cancel your own vacation requests.");
+            }
+
+            var response = await cancelVacationRequestHandler.HandleAsync(id, userId, cancellationToken);
 
             return response is null
-                ? Results.NotFound()
+                ? ApiErrors.NotFound()
                 : Results.Ok(response);
         })
         .RequireAuthorization();
