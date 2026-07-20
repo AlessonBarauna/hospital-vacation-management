@@ -81,4 +81,9 @@ public sealed class FakeVacationRequestRepository : IVacationRequestRepository
 
         return Task.FromResult(hasOverlap);
     }
+
+    public Task<IReadOnlyCollection<VacationRequest>> ListApprovedByMonthAsync(Guid? departmentId, DateOnly monthStart, DateOnly monthEnd, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

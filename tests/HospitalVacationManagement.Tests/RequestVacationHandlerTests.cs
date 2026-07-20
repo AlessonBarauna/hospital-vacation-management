@@ -56,6 +56,7 @@ public sealed class RequestVacationHandlerTests
 
         vacationRequestRepository.Add(new VacationRequest(
             Guid.NewGuid(),
+            Guid.NewGuid(),
             employeeId,
             new DateOnly(2026, 8, 1),
             new DateOnly(2026, 8, 10),

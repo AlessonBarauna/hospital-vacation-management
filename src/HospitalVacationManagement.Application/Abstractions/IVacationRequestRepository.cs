@@ -30,8 +30,14 @@ public interface IVacationRequestRepository
     Task<VacationRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
     Task<bool> HasOverlappingRequestForEmployeeAsync(
-    Guid employeeId,
-    DateOnly startDate,
-    DateOnly endDate,
-    CancellationToken cancellationToken);
+        Guid employeeId,
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<VacationRequest>> ListApprovedByMonthAsync(
+        Guid? departmentId,
+        DateOnly monthStart,
+        DateOnly monthEnd,
+        CancellationToken cancellationToken);
 }

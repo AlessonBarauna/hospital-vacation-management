@@ -126,4 +126,28 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
                 startDate <= vacationRequest.EndDate,
                 cancellationToken);
     }
+
+    public async Task<IReadOnlyCollection<VacationRequest>> ListApprovedByMonthAsync(
+    Guid? departmentId,
+    DateOnly monthStart,
+    DateOnly monthEnd,
+    CancellationToken cancellationToken)
+{
+    var query = _dbContext.VacationRequests
+        .AsNoTracking()
+        .Where(vacationRequest => vacationRequest.Status == VacationRequestStatus.Approved)
+        .Where(vacationRequest =>
+            vacationRequest.StartDate <= monthEnd &&
+            vacationRequest.EndDate >= monthStart);
+
+    if (departmentId.HasValue)
+    {
+        query = query.Where(vacationRequest =>
+            vacationRequest.DepartmentId == departmentId.Value);
+    }
+
+    return await query
+        .OrderBy(vacationRequest => vacationRequest.StartDate)
+        .ToListAsync(cancellationToken);
+}
 }

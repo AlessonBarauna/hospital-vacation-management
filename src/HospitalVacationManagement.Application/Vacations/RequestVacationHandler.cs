@@ -83,7 +83,8 @@ public sealed class RequestVacationHandler
 
         var vacationRequest = new VacationRequest(
             Guid.NewGuid(),
-            request.EmployeeId,
+            employee.Id,
+            employee.DepartmentId,
             request.StartDate,
             request.EndDate,
             VacationRequestStatus.Pending,

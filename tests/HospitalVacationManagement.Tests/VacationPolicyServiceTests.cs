@@ -11,6 +11,7 @@ public sealed class VacationRequestTests
         var vacationRequest = new VacationRequest(
             Guid.NewGuid(),
             Guid.NewGuid(),
+            Guid.NewGuid(),
             new DateOnly(2026, 7, 10),
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Pending);
@@ -28,6 +29,7 @@ public sealed class VacationRequestTests
     public void Reject_ShouldChangeStatusToRejected_WhenVacationRequestIsPending()
     {
         var vacationRequest = new VacationRequest(
+            Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid(),
             new DateOnly(2026, 7, 10),
@@ -49,6 +51,7 @@ public sealed class VacationRequestTests
         var vacationRequest = new VacationRequest(
             Guid.NewGuid(),
             Guid.NewGuid(),
+            Guid.NewGuid(),
             new DateOnly(2026, 7, 10),
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Approved);
@@ -62,6 +65,7 @@ public sealed class VacationRequestTests
         var vacationRequest = new VacationRequest(
             Guid.NewGuid(),
             Guid.NewGuid(),
+            Guid.NewGuid(),
             new DateOnly(2026, 7, 10),
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Rejected);
@@ -73,6 +77,7 @@ public sealed class VacationRequestTests
     public void Cancel_ShouldChangeStatusToCancelled_WhenVacationRequestIsPending()
     {
         var vacationRequest = new VacationRequest(
+            Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid(),
             new DateOnly(2026, 7, 10),
@@ -92,6 +97,7 @@ public sealed class VacationRequestTests
     public void Cancel_ShouldThrowInvalidOperationException_WhenVacationRequestIsApproved()
     {
         var vacationRequest = new VacationRequest(
+            Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid(),
             new DateOnly(2026, 7, 10),

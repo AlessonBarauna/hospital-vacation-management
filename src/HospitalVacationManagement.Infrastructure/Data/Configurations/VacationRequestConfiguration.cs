@@ -26,6 +26,9 @@ public sealed class VacationRequestConfiguration : IEntityTypeConfiguration<Vaca
         builder.Property(vacationRequest => vacationRequest.CreatedAt)
             .IsRequired();
 
+        builder.Property(vacationRequest => vacationRequest.DepartmentId)
+            .IsRequired();
+
         builder.Property(vacationRequest => vacationRequest.UpdatedAt);
 
         builder.Property(vacationRequest => vacationRequest.ApprovedByUserId);
