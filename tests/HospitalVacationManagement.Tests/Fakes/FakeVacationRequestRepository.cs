@@ -82,8 +82,25 @@ public sealed class FakeVacationRequestRepository : IVacationRequestRepository
         return Task.FromResult(hasOverlap);
     }
 
-    public Task<IReadOnlyCollection<VacationRequest>> ListApprovedByMonthAsync(Guid? departmentId, DateOnly monthStart, DateOnly monthEnd, CancellationToken cancellationToken)
+    public Task<IReadOnlyCollection<VacationRequest>> ListApprovedByMonthAsync(
+    Guid? departmentId,
+    DateOnly monthStart,
+    DateOnly monthEnd,
+    CancellationToken cancellationToken)
+{
+    var vacations = _vacationRequests
+        .Where(vacationRequest => vacationRequest.Status == VacationRequestStatus.Approved)
+        .Where(vacationRequest =>
+            vacationRequest.StartDate <= monthEnd &&
+            vacationRequest.EndDate >= monthStart);
+
+    if (departmentId.HasValue)
     {
-        throw new NotImplementedException();
+        vacations = vacations.Where(vacationRequest =>
+            vacationRequest.DepartmentId == departmentId.Value);
     }
+
+    return Task.FromResult<IReadOnlyCollection<VacationRequest>>(
+        vacations.ToList());
+}
 }
