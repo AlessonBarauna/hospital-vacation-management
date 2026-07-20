@@ -1,6 +1,8 @@
 using FluentValidation;
 using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Domain.Vacations;
+using Microsoft.Extensions.Configuration.UserSecrets;
+using System.Security.Claims;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -89,36 +91,59 @@ public static class VacationRequestEndpoints
 
         app.MapPut("/vacation-requests/{id:guid}/approve", async (
             Guid id,
+            ClaimsPrincipal currentUser,
             ApproveVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
-            var response = await handler.HandleAsync(id, cancellationToken);
+            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(currentUserId, out var userId))
+            {
+                return Results.Unauthorized();
+            }
+
+            var response = await handler.HandleAsync(id, userId, cancellationToken);
 
             return response is null
-                ? Results.NotFound()
-                : Results.Ok(response);
+    ? Results.NotFound()
+    : Results.Ok(response);
         })
         .RequireAuthorization("ManagerOrAdmin");
 
         app.MapPut("/vacation-requests/{id:guid}/reject", async (
             Guid id,
+            ClaimsPrincipal currentUser,
             RejectVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
-            var response = await handler.HandleAsync(id, cancellationToken);
+            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(currentUserId, out var userId))
+            {
+                return Results.Unauthorized();
+            }
+
+            var response = await handler.HandleAsync(id, userId, cancellationToken);
 
             return response is null
-                ? Results.NotFound()
-                : Results.Ok(response);
+    ? Results.NotFound()
+    : Results.Ok(response);
         })
         .RequireAuthorization("ManagerOrAdmin");
 
         app.MapPut("/vacation-requests/{id:guid}/cancel", async (
             Guid id,
+            ClaimsPrincipal currentUser,
             CancelVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
-            var response = await handler.HandleAsync(id, cancellationToken);
+            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(currentUserId, out var userId))
+            {
+                return Results.Unauthorized();
+            }
+
+            var response = await handler.HandleAsync(id, userId, cancellationToken);
 
             return response is null
                 ? Results.NotFound()

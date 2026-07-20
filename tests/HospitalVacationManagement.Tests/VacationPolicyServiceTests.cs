@@ -15,7 +15,7 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Pending);
 
-        vacationRequest.Approve();
+        vacationRequest.Approve(Guid.NewGuid());
 
         Assert.Equal(VacationRequestStatus.Approved, vacationRequest.Status);
     }
@@ -30,7 +30,7 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Pending);
 
-        vacationRequest.Reject();
+        vacationRequest.Reject(Guid.NewGuid());
 
         Assert.Equal(VacationRequestStatus.Rejected, vacationRequest.Status);
     }
@@ -45,7 +45,7 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Approved);
 
-        Assert.Throws<InvalidOperationException>(() => vacationRequest.Approve());
+        Assert.Throws<InvalidOperationException>(() => vacationRequest.Approve(Guid.NewGuid()));
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Rejected);
 
-        Assert.Throws<InvalidOperationException>(() => vacationRequest.Reject());
+        Assert.Throws<InvalidOperationException>(() => vacationRequest.Reject(Guid.NewGuid()));
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Pending);
 
-        vacationRequest.Cancel();
+        vacationRequest.Cancel(Guid.NewGuid());
 
         Assert.Equal(VacationRequestStatus.Cancelled, vacationRequest.Status);
     }
@@ -86,6 +86,6 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Approved);
 
-        Assert.Throws<InvalidOperationException>(() => vacationRequest.Cancel());
+        Assert.Throws<InvalidOperationException>(() => vacationRequest.Cancel(Guid.NewGuid()));
     }
 }

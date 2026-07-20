@@ -15,4 +15,7 @@ public sealed record VacationRequestSummaryResponse(
     DateOnly EndDate,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
+    Guid? ApprovedByUserId,
+    Guid? RejectedByUserId,
+    Guid? CancelledByUserId,
     VacationRequestStatus Status);

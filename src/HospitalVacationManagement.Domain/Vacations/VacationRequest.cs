@@ -1,3 +1,5 @@
+using System.Dynamic;
+
 namespace HospitalVacationManagement.Domain.Vacations;
 
 public sealed class VacationRequest
@@ -17,7 +19,7 @@ public sealed class VacationRequest
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void Approve()
+    public void Approve(Guid approvedByUserId)
     {
         if (Status != VacationRequestStatus.Pending)
         {
@@ -25,10 +27,11 @@ public sealed class VacationRequest
         }
 
         Status = VacationRequestStatus.Approved;
+        ApprovedByUserId = approvedByUserId;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Reject()
+    public void Reject(Guid rejectedByUserId)
     {
         if (Status != VacationRequestStatus.Pending)
         {
@@ -36,11 +39,13 @@ public sealed class VacationRequest
         }
 
         Status = VacationRequestStatus.Rejected;
+        RejectedByUserId = rejectedByUserId;
         UpdatedAt = DateTime.UtcNow;
+        
 
     }
 
-    public void Cancel()
+    public void Cancel(Guid cancelledByUserId)
     {
         if (Status == VacationRequestStatus.Cancelled)
         {
@@ -53,6 +58,7 @@ public sealed class VacationRequest
         }
 
         Status = VacationRequestStatus.Cancelled;
+        CancelledByUserId = cancelledByUserId;
         UpdatedAt = DateTime.UtcNow;
     }
 
@@ -63,7 +69,9 @@ public sealed class VacationRequest
     public VacationRequestStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
-
+    public Guid? ApprovedByUserId { get; private set; }
+    public Guid? RejectedByUserId { get; private set; }
+    public Guid? CancelledByUserId { get; private set; }
     public bool Overlaps(DateOnly startDate, DateOnly endDate)
     {
         return StartDate <= endDate && startDate <= EndDate;

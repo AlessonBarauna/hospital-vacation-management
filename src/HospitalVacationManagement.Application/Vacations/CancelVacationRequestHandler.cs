@@ -17,6 +17,7 @@ public sealed class CancelVacationRequestHandler
 
     public async Task<ChangeVacationRequestStatusResponse> HandleAsync(
         Guid id,
+        Guid currentUserId,
         CancellationToken cancellationToken)
     {
         var vacationRequest = await _vacationRequestRepository.GetByIdAsync(id, cancellationToken);
@@ -28,7 +29,7 @@ public sealed class CancelVacationRequestHandler
 
         try
         {
-            vacationRequest.Cancel();
+            vacationRequest.Cancel(currentUserId);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
