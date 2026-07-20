@@ -15,9 +15,13 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Pending);
 
-        vacationRequest.Approve(Guid.NewGuid());
+        var approvedByUserId = Guid.NewGuid();
+
+        vacationRequest.Approve(approvedByUserId);
 
         Assert.Equal(VacationRequestStatus.Approved, vacationRequest.Status);
+        Assert.Equal(approvedByUserId, vacationRequest.ApprovedByUserId);
+        Assert.NotNull(vacationRequest.UpdatedAt);
     }
 
     [Fact]
@@ -30,9 +34,13 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Pending);
 
-        vacationRequest.Reject(Guid.NewGuid());
+        var rejectedByUserId = Guid.NewGuid();
+
+        vacationRequest.Reject(rejectedByUserId);
 
         Assert.Equal(VacationRequestStatus.Rejected, vacationRequest.Status);
+        Assert.Equal(rejectedByUserId, vacationRequest.RejectedByUserId);
+        Assert.NotNull(vacationRequest.UpdatedAt);
     }
 
     [Fact]
@@ -71,9 +79,13 @@ public sealed class VacationRequestTests
             new DateOnly(2026, 7, 20),
             VacationRequestStatus.Pending);
 
-        vacationRequest.Cancel(Guid.NewGuid());
+        var cancelledByUserId = Guid.NewGuid();
+
+        vacationRequest.Cancel(cancelledByUserId);
 
         Assert.Equal(VacationRequestStatus.Cancelled, vacationRequest.Status);
+        Assert.Equal(cancelledByUserId, vacationRequest.CancelledByUserId);
+        Assert.NotNull(vacationRequest.UpdatedAt);
     }
 
     [Fact]
