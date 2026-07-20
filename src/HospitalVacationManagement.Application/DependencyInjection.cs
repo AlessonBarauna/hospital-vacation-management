@@ -8,6 +8,7 @@ using FluentValidation;
 using HospitalVacationManagement.Application.Users;
 using System.ComponentModel;
 using HospitalVacationManagement.Application.Calendar;
+using HospitalVacationManagement.Application.Reports;
 
 namespace HospitalVacationManagement.Application;
 
@@ -43,6 +44,7 @@ public static class DependencyInjection
         services.AddScoped<ChangeOwnPasswordHandler>();
         services.AddScoped<ListChangedEventHandler>();
         services.AddScoped<ListVacationCalendarHandler>();
+        services.AddScoped<VacationsByDepartmentHandler>();
 
         return services;
     }

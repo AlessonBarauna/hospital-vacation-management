@@ -14,6 +14,7 @@ public static class EndpointExtensions
         app.MapEmployeeEndpoints();
         app.MapVacationRequestEndpoints();
         app.MapCalendarEndpoints();
+        app.MapReportEndpoints();
 
         return app;
     }

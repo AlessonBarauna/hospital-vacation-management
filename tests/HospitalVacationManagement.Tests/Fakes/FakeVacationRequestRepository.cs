@@ -87,20 +87,34 @@ public sealed class FakeVacationRequestRepository : IVacationRequestRepository
     DateOnly monthStart,
     DateOnly monthEnd,
     CancellationToken cancellationToken)
-{
-    var vacations = _vacationRequests
-        .Where(vacationRequest => vacationRequest.Status == VacationRequestStatus.Approved)
-        .Where(vacationRequest =>
-            vacationRequest.StartDate <= monthEnd &&
-            vacationRequest.EndDate >= monthStart);
-
-    if (departmentId.HasValue)
     {
-        vacations = vacations.Where(vacationRequest =>
-            vacationRequest.DepartmentId == departmentId.Value);
+        var vacations = _vacationRequests
+            .Where(vacationRequest => vacationRequest.Status == VacationRequestStatus.Approved)
+            .Where(vacationRequest =>
+                vacationRequest.StartDate <= monthEnd &&
+                vacationRequest.EndDate >= monthStart);
+
+        if (departmentId.HasValue)
+        {
+            vacations = vacations.Where(vacationRequest =>
+                vacationRequest.DepartmentId == departmentId.Value);
+        }
+
+        return Task.FromResult<IReadOnlyCollection<VacationRequest>>(
+            vacations.ToList());
     }
 
-    return Task.FromResult<IReadOnlyCollection<VacationRequest>>(
-        vacations.ToList());
-}
+    public Task<IReadOnlyCollection<VacationRequest>> ListByPeriodAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken)
+    {
+        var vacations = _vacationRequests
+            .Where(vacationRequest =>
+                vacationRequest.StartDate <= endDate &&
+                vacationRequest.EndDate >= startDate)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyCollection<VacationRequest>>(vacations);
+    }
 }

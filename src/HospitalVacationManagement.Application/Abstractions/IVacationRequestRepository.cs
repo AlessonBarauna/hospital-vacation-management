@@ -40,4 +40,9 @@ public interface IVacationRequestRepository
         DateOnly monthStart,
         DateOnly monthEnd,
         CancellationToken cancellationToken);
+
+        Task<IReadOnlyCollection<VacationRequest>> ListByPeriodAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken);
 }

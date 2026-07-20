@@ -132,22 +132,36 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
     DateOnly monthStart,
     DateOnly monthEnd,
     CancellationToken cancellationToken)
-{
-    var query = _dbContext.VacationRequests
-        .AsNoTracking()
-        .Where(vacationRequest => vacationRequest.Status == VacationRequestStatus.Approved)
-        .Where(vacationRequest =>
-            vacationRequest.StartDate <= monthEnd &&
-            vacationRequest.EndDate >= monthStart);
-
-    if (departmentId.HasValue)
     {
-        query = query.Where(vacationRequest =>
-            vacationRequest.DepartmentId == departmentId.Value);
+        var query = _dbContext.VacationRequests
+            .AsNoTracking()
+            .Where(vacationRequest => vacationRequest.Status == VacationRequestStatus.Approved)
+            .Where(vacationRequest =>
+                vacationRequest.StartDate <= monthEnd &&
+                vacationRequest.EndDate >= monthStart);
+
+        if (departmentId.HasValue)
+        {
+            query = query.Where(vacationRequest =>
+                vacationRequest.DepartmentId == departmentId.Value);
+        }
+
+        return await query
+            .OrderBy(vacationRequest => vacationRequest.StartDate)
+            .ToListAsync(cancellationToken);
     }
 
-    return await query
-        .OrderBy(vacationRequest => vacationRequest.StartDate)
-        .ToListAsync(cancellationToken);
-}
+    public async Task<IReadOnlyCollection<VacationRequest>> ListByPeriodAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.VacationRequests
+            .AsNoTracking()
+            .Where(vacationRequest =>
+                vacationRequest.StartDate <= endDate &&
+                vacationRequest.EndDate >= startDate)
+            .OrderBy(vacationRequest => vacationRequest.StartDate)
+            .ToListAsync(cancellationToken);
+    }
 }

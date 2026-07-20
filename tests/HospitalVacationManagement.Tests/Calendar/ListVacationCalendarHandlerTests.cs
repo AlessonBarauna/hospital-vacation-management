@@ -50,4 +50,36 @@ public sealed class ListVacationCalendarHandlerTests
         Assert.Single(result);
         Assert.Equal(approvedVacation.Id, result.First().VacationRequestId);
     }
+
+    [Fact]
+    public async Task HandleAsync_ShouldReturnVacation_WhenVacationStartsBeforeMonthAndEndsInsideMonth()
+    {
+        var departmentId = Guid.NewGuid();
+
+        var vacationRequestRepository = new FakeVacationRequestRepository();
+
+        var approvedVacation = new VacationRequest(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            departmentId,
+            new DateOnly(2026, 6, 30),
+            new DateOnly(2026, 7, 5),
+            VacationRequestStatus.Approved);
+
+        await vacationRequestRepository.AddAsync(
+            approvedVacation,
+            CancellationToken.None);
+
+        var handler = new ListVacationCalendarHandler(vacationRequestRepository);
+
+        var request = new ListVacationCalendarRequest(
+            departmentId,
+            2026,
+            7);
+
+        var result = await handler.HandleAsync(request, CancellationToken.None);
+
+        Assert.Single(result);
+        Assert.Equal(approvedVacation.Id, result.First().VacationRequestId);
+    }
 }
