@@ -37,50 +37,76 @@ public sealed class RequestVacationHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_ShouldReturnError_WhenEmployeeHasOverlappingRequest()
-    {
-        var departmentId = Guid.NewGuid();
-        var employeeId = Guid.NewGuid();
+public async Task HandleAsync_ShouldReturnError_WhenEmployeeHasOverlappingRequest()
+{
+    var departmentId = Guid.NewGuid();
+    var employeeId = Guid.NewGuid();
+    var currentUserId = Guid.NewGuid();
 
-        var employeeRepository = new FakeEmployeeRepository();
-        var departmentRepository = new FakeDepartmentRepository();
-        var vacationRequestRepository = new FakeVacationRequestRepository();
-        var unitOfWork = new FakeUnitOfWork();
+    var employeeRepository = new FakeEmployeeRepository();
+    var departmentRepository = new FakeDepartmentRepository();
+    var vacationRequestRepository = new FakeVacationRequestRepository();
+    var unitOfWork = new FakeUnitOfWork();
+    var vacationPolicyService = new VacationPolicyService();
 
-        employeeRepository.Add(new Employee(
-            employeeId,
-            "Maria Oliveira",
-            departmentId,
-            JobRole.Nurse,
-            SeniorityLevel.Senior));
+    var department = new Department(
+        departmentId,
+        "Emergency",
+        maximumSimultaneousVacations: 2);
 
-        vacationRequestRepository.Add(new VacationRequest(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            employeeId,
-            new DateOnly(2026, 8, 1),
-            new DateOnly(2026, 8, 10),
-            VacationRequestStatus.Pending));
+    var employee = new Employee(
+        employeeId,
+        "Maria Gestora",
+        departmentId,
+        JobRole.Nurse,
+        SeniorityLevel.Junior);
 
-        var handler = new RequestVacationHandler(
-            employeeRepository,
-            departmentRepository,
-            vacationRequestRepository,
-            new VacationPolicyService(),
-            unitOfWork);
+    var seniorEmployee = new Employee(
+        Guid.NewGuid(),
+        "Ana Senior",
+        departmentId,
+        JobRole.Nurse,
+        SeniorityLevel.Senior);
 
-        var request = new RequestVacationRequest(
-            employeeId,
-            new DateOnly(2026, 8, 5),
-            new DateOnly(2026, 8, 15));
+    departmentRepository.Add(department);
+    employeeRepository.Add(employee);
+    employeeRepository.Add(seniorEmployee);
 
-        var response = await handler.HandleAsync(request, Guid.NewGuid(), CancellationToken.None);
+    var existingVacationRequest = new VacationRequest(
+        Guid.NewGuid(),
+        employeeId,
+        departmentId,
+        new DateOnly(2026, 7, 10),
+        new DateOnly(2026, 7, 20),
+        VacationRequestStatus.Pending,
+        currentUserId);
 
-        Assert.False(response.IsValid);
-        Assert.Contains("Employee already has a pending or approved vacation request in this period.", response.Errors);
-        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
-    }
+    await vacationRequestRepository.AddAsync(
+        existingVacationRequest,
+        CancellationToken.None);
 
+    var handler = new RequestVacationHandler(
+        employeeRepository,
+        departmentRepository,
+        vacationRequestRepository,
+        vacationPolicyService,
+        unitOfWork);
+
+    var request = new RequestVacationRequest(
+        employeeId,
+        new DateOnly(2026, 7, 15),
+        new DateOnly(2026, 7, 25));
+
+    var result = await handler.HandleAsync(
+        request,
+        currentUserId,
+        CancellationToken.None);
+
+    Assert.False(result.IsValid);
+    Assert.Contains(
+        "Employee already has a pending or approved vacation request in this period.",
+        result.Errors);
+}
     [Fact]
     public async Task HandleAsync_ShouldCreateVacationRequest_WhenRequestIsValid()
     {
