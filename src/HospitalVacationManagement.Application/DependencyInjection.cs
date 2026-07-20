@@ -45,6 +45,7 @@ public static class DependencyInjection
         services.AddScoped<ListChangedEventHandler>();
         services.AddScoped<ListVacationCalendarHandler>();
         services.AddScoped<VacationsByDepartmentHandler>();
+        services.AddScoped<StaffAvailabilityHandler>();
 
         return services;
     }
