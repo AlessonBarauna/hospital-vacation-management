@@ -2,6 +2,7 @@ using HospitalVacationManagement.Application.Reports;
 using HospitalVacationManagement.Domain.Employees;
 using HospitalVacationManagement.Domain.Vacations;
 using HospitalVacationManagement.Tests.Fakes;
+using HospitalVacationManagement.Domain.Departments;
 using Xunit;
 
 namespace HospitalVacationManagement.Tests.Reports;
@@ -12,6 +13,8 @@ public sealed class StaffAvailabilityHandlerTests
     public async Task HandleAsync_ShouldCalculateStaffAvailability()
     {
         var departmentId = Guid.NewGuid();
+
+        var departmentRepository = new FakeDepartmentRepository();
 
         var employeeRepository = new FakeEmployeeRepository();
         var vacationRequestRepository = new FakeVacationRequestRepository();
@@ -54,6 +57,7 @@ public sealed class StaffAvailabilityHandlerTests
             CancellationToken.None);
 
         var handler = new StaffAvailabilityHandler(
+            departmentRepository,
             employeeRepository,
             vacationRequestRepository);
 
@@ -62,12 +66,20 @@ public sealed class StaffAvailabilityHandlerTests
             new DateOnly(2026, 7, 15),
             new DateOnly(2026, 7, 16));
 
+        var department = new Department(
+            departmentId,
+            "Emergency",
+            maximumSimultaneousVacations: 2);
+
+        departmentRepository.Add(department);
+
         var result = await handler.HandleAsync(request, CancellationToken.None);
 
         Assert.Equal(departmentId, result.DepartmentId);
         Assert.Equal(3, result.TotalEmployees);
         Assert.Equal(1, result.EmployeesOnVacation);
         Assert.Equal(2, result.AvailableEmployees);
-        Assert.Equal(1, result.AvailableSeniorEmployess);
+        Assert.Equal(1, result.AvailableSeniorEmployees);
+        Assert.Equal("Emergency", result.DepartmentName);
     }
 }

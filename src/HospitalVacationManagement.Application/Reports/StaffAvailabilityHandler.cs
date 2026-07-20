@@ -10,9 +10,11 @@ public sealed class StaffAvailabilityHandler
     private readonly IVacationRequestRepository _vacationRequestRepository;
 
     public StaffAvailabilityHandler(
+        IDepartmentRepository departmentRepository,
         IEmployeeRepository employeeRepository,
         IVacationRequestRepository vacationRequestRepository)
     {
+        _departmentRepository = departmentRepository;
         _employeeRepository = employeeRepository;
         _vacationRequestRepository = vacationRequestRepository;
     }
@@ -21,6 +23,15 @@ public sealed class StaffAvailabilityHandler
         StaffAvailabilityRequest request,
         CancellationToken cancellationToken = default)
     {
+        var department = await _departmentRepository.GetByIdAsync(
+            request.DepartmentId,
+            cancellationToken);
+
+        if (department is null)
+        {
+            throw new InvalidOperationException("Department was not found.");
+        }
+
         var employees = await _employeeRepository.GetByDepartmentIdAsync(
             request.DepartmentId,
             cancellationToken);
@@ -49,9 +60,11 @@ public sealed class StaffAvailabilityHandler
 
         return new StaffAvailabilityResponse(
             request.DepartmentId,
+            department.Name,
             employees.Count(),
             employeeIdsOnVacation.Count,
             availableEmployees.Count,
             availableSeniorEmployees);
     }
+    private readonly IDepartmentRepository _departmentRepository;
 }
