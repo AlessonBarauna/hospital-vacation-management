@@ -33,20 +33,21 @@ public static class VacationRequestEndpoints
             RequestVacationRequest request,
             IValidator<RequestVacationRequest> validator,
             RequestVacationHandler handler,
+            ClaimsPrincipal currentUser,
             CancellationToken cancellationToken) =>
         {
-            var validationResult = await validator.ValidateAsync(request, cancellationToken);
+            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (!validationResult.IsValid)
+            if (!Guid.TryParse(currentUserId, out var userId))
             {
-                return Results.ValidationProblem(validationResult.ToDictionary());
+                return Results.Unauthorized();
             }
 
-            var response = await handler.HandleAsync(request, cancellationToken);
+            var response = await handler.HandleAsync(request, userId, cancellationToken);
 
             return response.IsValid
-    ? Results.Created($"/vacation-requests/{response.VacationRequestId}", response)
-    : Results.BadRequest(response);
+                ? Results.Created($"/vacation-requests/{response.VacationRequestId}", response)
+                : Results.BadRequest(response);
         })
         .RequireAuthorization();
 

@@ -18,4 +18,5 @@ public sealed record VacationRequestSummaryResponse(
     Guid? ApprovedByUserId,
     Guid? RejectedByUserId,
     Guid? CancelledByUserId,
+    Guid? CreatedByUserId,
     VacationRequestStatus Status);

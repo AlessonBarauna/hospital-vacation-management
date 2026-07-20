@@ -29,7 +29,7 @@ public sealed class RequestVacationHandlerTests
             new DateOnly(2026, 8, 1),
             new DateOnly(2026, 8, 10));
 
-        var response = await handler.HandleAsync(request, CancellationToken.None);
+        var response = await handler.HandleAsync(request, Guid.NewGuid(), CancellationToken.None);
 
         Assert.False(response.IsValid);
         Assert.Contains("Employee was not found.", response.Errors);
@@ -73,7 +73,7 @@ public sealed class RequestVacationHandlerTests
             new DateOnly(2026, 8, 5),
             new DateOnly(2026, 8, 15));
 
-        var response = await handler.HandleAsync(request, CancellationToken.None);
+        var response = await handler.HandleAsync(request, Guid.NewGuid(), CancellationToken.None);
 
         Assert.False(response.IsValid);
         Assert.Contains("Employee already has a pending or approved vacation request in this period.", response.Errors);
@@ -123,7 +123,7 @@ public sealed class RequestVacationHandlerTests
             new DateOnly(2026, 8, 1),
             new DateOnly(2026, 8, 10));
 
-        var response = await handler.HandleAsync(request, CancellationToken.None);
+        var response = await handler.HandleAsync(request, Guid.NewGuid(), CancellationToken.None);
 
         Assert.True(response.IsValid);
         Assert.NotNull(response.VacationRequestId);

@@ -4,7 +4,13 @@ namespace HospitalVacationManagement.Domain.Vacations;
 
 public sealed class VacationRequest
 {
-    public VacationRequest(Guid id, Guid employeeId, DateOnly startDate, DateOnly endDate, VacationRequestStatus status)
+    public VacationRequest(
+    Guid id,
+    Guid employeeId,
+    DateOnly startDate,
+    DateOnly endDate,
+    VacationRequestStatus status,
+    Guid? createdByUserId = null)
     {
         if (endDate < startDate)
         {
@@ -17,6 +23,7 @@ public sealed class VacationRequest
         EndDate = endDate;
         Status = status;
         CreatedAt = DateTime.UtcNow;
+        CreatedByUserId = createdByUserId;
     }
 
     public void Approve(Guid approvedByUserId)
@@ -41,7 +48,7 @@ public sealed class VacationRequest
         Status = VacationRequestStatus.Rejected;
         RejectedByUserId = rejectedByUserId;
         UpdatedAt = DateTime.UtcNow;
-        
+
 
     }
 
@@ -72,6 +79,7 @@ public sealed class VacationRequest
     public Guid? ApprovedByUserId { get; private set; }
     public Guid? RejectedByUserId { get; private set; }
     public Guid? CancelledByUserId { get; private set; }
+    public Guid? CreatedByUserId { get; private set; }
     public bool Overlaps(DateOnly startDate, DateOnly endDate)
     {
         return StartDate <= endDate && startDate <= EndDate;

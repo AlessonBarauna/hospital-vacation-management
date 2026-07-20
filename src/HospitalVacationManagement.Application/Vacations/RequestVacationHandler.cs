@@ -27,6 +27,7 @@ public sealed class RequestVacationHandler
 
     public async Task<RequestVacationResponse> HandleAsync(
         RequestVacationRequest request,
+         Guid currentUserId,
         CancellationToken cancellationToken)
     {
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, cancellationToken);
@@ -82,10 +83,11 @@ public sealed class RequestVacationHandler
 
         var vacationRequest = new VacationRequest(
             Guid.NewGuid(),
-            employee.Id,
+            request.EmployeeId,
             request.StartDate,
             request.EndDate,
-            VacationRequestStatus.Pending);
+            VacationRequestStatus.Pending,
+            currentUserId);
 
         await _vacationRequestRepository.AddAsync(vacationRequest, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

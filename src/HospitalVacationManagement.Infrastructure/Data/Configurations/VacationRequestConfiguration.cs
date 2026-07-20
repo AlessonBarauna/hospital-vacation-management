@@ -33,5 +33,7 @@ public sealed class VacationRequestConfiguration : IEntityTypeConfiguration<Vaca
         builder.Property(vacationRequest => vacationRequest.RejectedByUserId);
 
         builder.Property(vacationRequest => vacationRequest.CancelledByUserId);
+        
+        builder.Property(vacationRequest => vacationRequest.CreatedByUserId);
     }
 }

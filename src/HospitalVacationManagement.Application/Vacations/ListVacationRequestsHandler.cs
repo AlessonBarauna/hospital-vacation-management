@@ -85,6 +85,7 @@ public sealed class ListVacationRequestsHandler
                 vacationRequest.ApprovedByUserId,
                 vacationRequest.RejectedByUserId,
                 vacationRequest.CancelledByUserId,
+                vacationRequest.CreatedByUserId,
                 vacationRequest.Status));
         }
 
