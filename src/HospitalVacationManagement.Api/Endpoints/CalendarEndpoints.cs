@@ -1,5 +1,6 @@
 using HospitalVacationManagement.Application.Calendar;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -12,7 +13,7 @@ public static class CalendarEndpoints
             int year,
             int month,
             IValidator<ListVacationCalendarRequest> validator,
-            ListVacationCalendarHandler handler,
+            [FromServices] ListVacationCalendarHandler handler,
             CancellationToken cancellationToken) =>
         {
             var request = new ListVacationCalendarRequest(

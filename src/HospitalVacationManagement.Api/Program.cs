@@ -22,9 +22,9 @@ builder.Host.UseSerilog((context, configuration) =>
 
 builder.Services.AddApiSwagger();
 builder.Services.AddApiHealthChecks(builder.Configuration);
-
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApiRateLimiting();
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
@@ -42,6 +42,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapApiEndpoints();
 
 app.UseApiSwagger();

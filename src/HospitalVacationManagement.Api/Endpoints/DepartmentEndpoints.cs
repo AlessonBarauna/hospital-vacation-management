@@ -1,4 +1,5 @@
 using HospitalVacationManagement.Application.Departments;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -8,7 +9,7 @@ public static class DepartmentEndpoints
     {
         app.MapPost("/departments", async (
             CreateDepartmentRequest request,
-            CreateDepartmentHandler handler,
+            [FromServices] CreateDepartmentHandler handler,
             CancellationToken cancellationToken) =>
         {
             var response = await handler.HandleAsync(request, cancellationToken);
@@ -18,7 +19,7 @@ public static class DepartmentEndpoints
         .RequireAuthorization("AdminOnly");
 
         app.MapGet("/departments", async (
-            ListDepartmentsHandler handler,
+            [FromServices] ListDepartmentsHandler handler,
             CancellationToken cancellationToken) =>
         {
             var response = await handler.HandleAsync(cancellationToken);
@@ -29,7 +30,7 @@ public static class DepartmentEndpoints
 
         app.MapGet("/departments/{id:guid}", async (
             Guid id,
-            GetDepartmentByIdHandler handler,
+            [FromServices] GetDepartmentByIdHandler handler,
             CancellationToken cancellationToken) =>
         {
             var response = await handler.HandleAsync(id, cancellationToken);

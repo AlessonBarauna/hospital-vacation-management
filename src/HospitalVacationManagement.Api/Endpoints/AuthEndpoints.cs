@@ -1,6 +1,7 @@
 using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Application.Authentication;
 using HospitalVacationManagement.Api.Errors;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -37,7 +38,8 @@ public static class AuthEndpoints
                 user.Role.ToString());
 
             return Results.Ok(loginResponse);
-        });
+        })
+        .RequireRateLimiting("LoginPolicy");
 
         return app;
     }

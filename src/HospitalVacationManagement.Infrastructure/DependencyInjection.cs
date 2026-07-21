@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace HospitalVacationManagement.Infrastructure;
 using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Infrastructure.Auth;
-
+using HospitalVacationManagement.Application.Authentication;
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddHostedService<DatabaseMigrationService>();
         services.AddHostedService<DatabaseSeedService>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         
 
         return services;

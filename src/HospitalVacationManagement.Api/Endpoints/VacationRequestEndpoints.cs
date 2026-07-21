@@ -4,6 +4,7 @@ using HospitalVacationManagement.Domain.Vacations;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using System.Security.Claims;
 using HospitalVacationManagement.Api.Errors;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -14,7 +15,7 @@ public static class VacationRequestEndpoints
         app.MapPost("/vacation-requests/validate", async (
             ValidateVacationRequest request,
             IValidator<ValidateVacationRequest> validator,
-            ValidateVacationRequestHandler handler,
+            [FromServices] ValidateVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);

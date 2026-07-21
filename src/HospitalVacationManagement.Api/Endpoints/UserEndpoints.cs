@@ -2,6 +2,7 @@ using FluentValidation;
 using HospitalVacationManagement.Application.Users;
 using System.Security.Claims;
 using HospitalVacationManagement.Api.Errors;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -12,7 +13,7 @@ public static class UserEndpoints
         app.MapPost("/users", async (
             CreateUserRequest request,
             IValidator<CreateUserRequest> validator,
-            CreateUserHandler handler,
+            [FromServices] CreateUserHandler handler,
             CancellationToken cancellationToken) =>
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -29,7 +30,7 @@ public static class UserEndpoints
         .RequireAuthorization("AdminOnly");
 
         app.MapGet("/users", async (
-            ListUsersHandler handler,
+            [FromServices] ListUsersHandler handler,
             CancellationToken cancellationToken) =>
         {
             var response = await handler.HandleAsync(cancellationToken);
@@ -40,7 +41,7 @@ public static class UserEndpoints
 
         app.MapGet("/users/{id:guid}", async (
             Guid id,
-            GetUserByIdHandler handler,
+            [FromServices] GetUserByIdHandler handler,
             CancellationToken cancellationToken) =>
         {
             var response = await handler.HandleAsync(id, cancellationToken);
@@ -55,7 +56,7 @@ public static class UserEndpoints
             Guid id,
             UpdateUserRequest request,
             IValidator<UpdateUserRequest> validator,
-            UpdateUserHandler handler,
+            [FromServices] UpdateUserHandler handler,
             CancellationToken cancellationToken) =>
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -77,7 +78,7 @@ public static class UserEndpoints
             Guid id,
             ChangeUserPasswordRequest request,
             IValidator<ChangeUserPasswordRequest> validator,
-            ChangeUserPasswordHandler handler,
+            [FromServices] ChangeUserPasswordHandler handler,
             CancellationToken cancellationToken) =>
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -98,7 +99,7 @@ public static class UserEndpoints
         app.MapPut("/users/{id:guid}/deactivate", async (
             Guid id,
             ClaimsPrincipal currentUser,
-            DeactivateUserHandler deactivateUserHandler,
+            [FromServices] DeactivateUserHandler deactivateUserHandler,
             CancellationToken cancellationToken) =>
         {
             var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -118,7 +119,7 @@ public static class UserEndpoints
 
         app.MapPut("/users/{id:guid}/activate", async (
             Guid id,
-            ActivateUserHandler handler,
+            [FromServices] ActivateUserHandler handler,
             CancellationToken cancellationToken) =>
         {
             var userWasActivated = await handler.HandleAsync(id, cancellationToken);

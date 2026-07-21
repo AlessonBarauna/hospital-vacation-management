@@ -1,5 +1,6 @@
 using HospitalVacationManagement.Application.Reports;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -11,7 +12,7 @@ public static class ReportEndpoints
             int year,
             int month,
             IValidator<VacationsByDepartmentRequest> validator,
-            VacationsByDepartmentHandler handler,
+            [FromServices] VacationsByDepartmentHandler handler,
             CancellationToken cancellationToken) =>
         {
             var request = new VacationsByDepartmentRequest(year, month);
@@ -34,7 +35,7 @@ public static class ReportEndpoints
             DateOnly startDate,
             DateOnly endDate,
             IValidator<StaffAvailabilityRequest> validator,
-            StaffAvailabilityHandler handler,
+            [FromServices] StaffAvailabilityHandler handler,
             CancellationToken cancellationToken) =>
     {
         var request = new StaffAvailabilityRequest(

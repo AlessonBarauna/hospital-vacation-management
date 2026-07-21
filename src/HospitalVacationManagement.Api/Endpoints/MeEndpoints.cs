@@ -2,6 +2,7 @@ using FluentValidation;
 using HospitalVacationManagement.Application.Users;
 using System.Security.Claims;
 using HospitalVacationManagement.Api.Errors;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -11,7 +12,7 @@ public static class MeEndpoints
     {
         app.MapGet("/me", async (
             ClaimsPrincipal currentUser,
-            GetCurrentUserHandler handler,
+            [FromServices] GetCurrentUserHandler handler,
             CancellationToken cancellationToken) =>
         {
             var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -33,7 +34,7 @@ public static class MeEndpoints
             ClaimsPrincipal currentUser,
             ChangeOwnPasswordRequest request,
             IValidator<ChangeOwnPasswordRequest> validator,
-            ChangeOwnPasswordHandler handler,
+            [FromServices] ChangeOwnPasswordHandler handler,
             CancellationToken cancellationToken) =>
         {
             var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
