@@ -1,7 +1,7 @@
 using FluentValidation;
-using HospitalVacationManagement.Application.Users;
-using System.Security.Claims;
 using HospitalVacationManagement.Api.Errors;
+using HospitalVacationManagement.Application.Abstractions;
+using HospitalVacationManagement.Application.Users;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalVacationManagement.Api.Endpoints;
@@ -11,13 +11,11 @@ public static class MeEndpoints
     public static IEndpointRouteBuilder MapMeEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/me", async (
-            ClaimsPrincipal currentUser,
+            ICurrentUserService currentUser,
             [FromServices] GetCurrentUserHandler handler,
             CancellationToken cancellationToken) =>
         {
-            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!Guid.TryParse(currentUserId, out var userId))
+            if (currentUser.UserId is not Guid userId)
             {
                 return ApiErrors.Unauthorized();
             }
@@ -31,15 +29,13 @@ public static class MeEndpoints
         .RequireAuthorization();
 
         app.MapPut("/me/password", async (
-            ClaimsPrincipal currentUser,
+            ICurrentUserService currentUser,
             ChangeOwnPasswordRequest request,
             IValidator<ChangeOwnPasswordRequest> validator,
             [FromServices] ChangeOwnPasswordHandler handler,
             CancellationToken cancellationToken) =>
         {
-            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!Guid.TryParse(currentUserId, out var userId))
+            if (currentUser.UserId is not Guid userId)
             {
                 return Results.Unauthorized();
             }
