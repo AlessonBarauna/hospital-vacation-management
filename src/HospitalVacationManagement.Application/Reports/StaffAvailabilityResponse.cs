@@ -6,4 +6,6 @@ public sealed record StaffAvailabilityResponse(
     int TotalEmployees,
     int EmployeesOnVacation,
     int AvailableEmployees,
-    int AvailableSeniorEmployees);
+    int AvailableSeniorEmployees,
+    bool IsSafe,
+    string? RiskReason);

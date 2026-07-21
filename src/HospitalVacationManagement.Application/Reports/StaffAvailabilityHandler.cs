@@ -58,13 +58,29 @@ public sealed class StaffAvailabilityHandler
         var availableSeniorEmployees = availableEmployees
             .Count(employee => employee.SeniorityLevel == SeniorityLevel.Senior);
 
+        var isSafe = true;
+        string? riskReason = null;
+
+        if (availableEmployees.Count == 0)
+        {
+            isSafe = false;
+            riskReason = "Department has no available employees.";
+        }
+        else if (availableSeniorEmployees == 0)
+        {
+            isSafe = false;
+            riskReason = "Department has no available senior employees.";
+        }
+
         return new StaffAvailabilityResponse(
             request.DepartmentId,
             department.Name,
             employees.Count(),
             employeeIdsOnVacation.Count,
             availableEmployees.Count,
-            availableSeniorEmployees);
+            availableSeniorEmployees,
+            isSafe,
+            riskReason);
     }
     private readonly IDepartmentRepository _departmentRepository;
 }

@@ -81,6 +81,69 @@ public sealed class StaffAvailabilityHandlerTests
         Assert.Equal(2, result.AvailableEmployees);
         Assert.Equal(1, result.AvailableSeniorEmployees);
         Assert.Equal("Emergency", result.DepartmentName);
+        Assert.True(result.IsSafe);
+        Assert.Null(result.RiskReason);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldReturnUnsafe_WhenThereAreNoAvailableSeniorEmployees()
+    {
+        var departmentId = Guid.NewGuid();
+
+        var departmentRepository = new FakeDepartmentRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var vacationRequestRepository = new FakeVacationRequestRepository();
+
+        var department = new Department(
+            departmentId,
+            "Emergency",
+            maximumSimultaneousVacations: 2);
+
+        departmentRepository.Add(department);
+
+        var juniorAvailable = new Employee(
+            Guid.NewGuid(),
+            "Joao Junior",
+            departmentId,
+            JobRole.Nurse,
+            SeniorityLevel.Junior);
+
+        var seniorOnVacation = new Employee(
+            Guid.NewGuid(),
+            "Ana Senior",
+            departmentId,
+            JobRole.Nurse,
+            SeniorityLevel.Senior);
+
+        employeeRepository.Add(juniorAvailable);
+        employeeRepository.Add(seniorOnVacation);
+
+        var approvedVacation = new VacationRequest(
+            Guid.NewGuid(),
+            seniorOnVacation.Id,
+            departmentId,
+            new DateOnly(2026, 7, 10),
+            new DateOnly(2026, 7, 20),
+            VacationRequestStatus.Approved);
+
+        await vacationRequestRepository.AddAsync(
+            approvedVacation,
+            CancellationToken.None);
+
+        var handler = new StaffAvailabilityHandler(
+            departmentRepository,
+            employeeRepository,
+            vacationRequestRepository);
+
+        var request = new StaffAvailabilityRequest(
+            departmentId,
+            new DateOnly(2026, 7, 15),
+            new DateOnly(2026, 7, 16));
+
+        var result = await handler.xdxxxHandleAsync(request, CancellationToken.None);
+
+        Assert.False(result.IsSafe);
+        Assert.Equal("Department has no available senior employees.", result.RiskReason);
     }
 
     [Fact]
