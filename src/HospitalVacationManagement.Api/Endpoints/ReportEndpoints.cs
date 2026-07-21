@@ -49,7 +49,7 @@ public static class ReportEndpoints
             return Results.ValidationProblem(validationResult.ToDictionary());
         }
 
-        var response = await handler.xdxxxHandleAsync(request, cancellationToken);
+        var response = await handler.HandleAsync(request, cancellationToken);
 
         return Results.Ok(response);
     })

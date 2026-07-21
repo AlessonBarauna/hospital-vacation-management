@@ -73,7 +73,7 @@ public sealed class StaffAvailabilityHandlerTests
 
         departmentRepository.Add(department);
 
-        var result = await handler.xdxxxHandleAsync(request, CancellationToken.None);
+        var result = await handler.HandleAsync(request, CancellationToken.None);
 
         Assert.Equal(departmentId, result.DepartmentId);
         Assert.Equal(3, result.TotalEmployees);
@@ -140,7 +140,7 @@ public sealed class StaffAvailabilityHandlerTests
             new DateOnly(2026, 7, 15),
             new DateOnly(2026, 7, 16));
 
-        var result = await handler.xdxxxHandleAsync(request, CancellationToken.None);
+        var result = await handler.HandleAsync(request, CancellationToken.None);
 
         Assert.False(result.IsSafe);
         Assert.Equal("Department has no available senior employees.", result.RiskReason);
@@ -164,8 +164,81 @@ public sealed class StaffAvailabilityHandlerTests
             new DateOnly(2026, 7, 20));
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            handler.xdxxxHandleAsync(request, CancellationToken.None));
+            handler.HandleAsync(request, CancellationToken.None));
 
         Assert.Equal("Department was not found.", exception.Message);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldReturnUnsafe_WhenThereAreNoAvailableEmployees()
+    {
+        var departmentId = Guid.NewGuid();
+
+        var departmentRepository = new FakeDepartmentRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var vacationRequestRepository = new FakeVacationRequestRepository();
+
+        var department = new Department(
+            departmentId,
+            "Emergency",
+            maximumSimultaneousVacations: 2);
+
+        departmentRepository.Add(department);
+
+        var juniorOnVacation = new Employee(
+            Guid.NewGuid(),
+            "Joao Junior",
+            departmentId,
+            JobRole.Nurse,
+            SeniorityLevel.Junior);
+
+        var seniorOnVacation = new Employee(
+            Guid.NewGuid(),
+            "Ana Senior",
+            departmentId,
+            JobRole.Nurse,
+            SeniorityLevel.Senior);
+
+        employeeRepository.Add(juniorOnVacation);
+        employeeRepository.Add(seniorOnVacation);
+
+        var juniorVacation = new VacationRequest(
+            Guid.NewGuid(),
+            juniorOnVacation.Id,
+            departmentId,
+            new DateOnly(2026, 7, 10),
+            new DateOnly(2026, 7, 20),
+            VacationRequestStatus.Approved);
+
+        var seniorVacation = new VacationRequest(
+            Guid.NewGuid(),
+            seniorOnVacation.Id,
+            departmentId,
+            new DateOnly(2026, 7, 10),
+            new DateOnly(2026, 7, 20),
+            VacationRequestStatus.Approved);
+
+        await vacationRequestRepository.AddAsync(
+            juniorVacation,
+            CancellationToken.None);
+
+        await vacationRequestRepository.AddAsync(
+            seniorVacation,
+            CancellationToken.None);
+
+        var handler = new StaffAvailabilityHandler(
+            departmentRepository,
+            employeeRepository,
+            vacationRequestRepository);
+
+        var request = new StaffAvailabilityRequest(
+            departmentId,
+            new DateOnly(2026, 7, 15),
+            new DateOnly(2026, 7, 16));
+
+        var result = await handler.HandleAsync(request, CancellationToken.None);
+
+        Assert.False(result.IsSafe);
+        Assert.Equal("Department has no available employees.", result.RiskReason);
     }
 }
