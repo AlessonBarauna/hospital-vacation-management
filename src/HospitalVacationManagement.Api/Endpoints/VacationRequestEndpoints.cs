@@ -2,7 +2,7 @@ using FluentValidation;
 using HospitalVacationManagement.Application.Vacations;
 using HospitalVacationManagement.Domain.Vacations;
 using Microsoft.Extensions.Configuration.UserSecrets;
-using System.Security.Claims;
+using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Api.Errors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,14 +35,12 @@ public static class VacationRequestEndpoints
             RequestVacationRequest request,
             IValidator<RequestVacationRequest> validator,
             RequestVacationHandler handler,
-            ClaimsPrincipal currentUser,
+            ICurrentUserService currentUser,
             CancellationToken cancellationToken) =>
         {
-            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!Guid.TryParse(currentUserId, out var userId))
+            if (currentUser.UserId is not Guid userId)
             {
-                return Results.Unauthorized();
+                return ApiErrors.Unauthorized();
             }
 
             var response = await handler.HandleAsync(request, userId, cancellationToken);
@@ -94,15 +92,13 @@ public static class VacationRequestEndpoints
 
         app.MapPut("/vacation-requests/{id:guid}/approve", async (
             Guid id,
-            ClaimsPrincipal currentUser,
+            ICurrentUserService currentUser,
             ApproveVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
-            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!Guid.TryParse(currentUserId, out var userId))
+            if (currentUser.UserId is not Guid userId)
             {
-                return Results.Unauthorized();
+                return ApiErrors.Unauthorized();
             }
 
             var response = await handler.HandleAsync(id, userId, cancellationToken);
@@ -115,15 +111,13 @@ public static class VacationRequestEndpoints
 
         app.MapPut("/vacation-requests/{id:guid}/reject", async (
             Guid id,
-            ClaimsPrincipal currentUser,
+            ICurrentUserService currentUser,
             RejectVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
-            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!Guid.TryParse(currentUserId, out var userId))
+            if (currentUser.UserId is not Guid userId)
             {
-                return Results.Unauthorized();
+                return ApiErrors.Unauthorized();
             }
 
             var response = await handler.HandleAsync(id, userId, cancellationToken);
@@ -136,19 +130,15 @@ public static class VacationRequestEndpoints
 
         app.MapPut("/vacation-requests/{id:guid}/cancel", async (
             Guid id,
-            ClaimsPrincipal currentUser,
-            GetVacationRequestByIdHandler getVacationRequestByIdHandler,
-            CancelVacationRequestHandler cancelVacationRequestHandler,
+            ICurrentUserService currentUser,
+            [FromServices] GetVacationRequestByIdHandler getVacationRequestByIdHandler,
+            [FromServices] CancelVacationRequestHandler cancelVacationRequestHandler,
             CancellationToken cancellationToken) =>
         {
-            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!Guid.TryParse(currentUserId, out var userId))
+            if (currentUser.UserId is not Guid userId)
             {
                 return ApiErrors.Unauthorized();
             }
-
-            var currentUserRole = currentUser.FindFirstValue(ClaimTypes.Role);
 
             var vacationRequest = await getVacationRequestByIdHandler.HandleAsync(id, cancellationToken);
 
@@ -157,16 +147,15 @@ public static class VacationRequestEndpoints
                 return ApiErrors.NotFound();
             }
 
-            var userIsManagerOrAdmin =
-                currentUserRole == "Admin" ||
-                currentUserRole == "Manager";
+            var currentUserRole = currentUser.Role;
 
-            var userCreatedVacationRequest =
-                vacationRequest.CreatedByUserId == userId;
+            var userCanCancel =
+                currentUserRole is "Admin" or "Manager" ||
+                vacationRequest.EmployeeId == userId;
 
-            if (!userIsManagerOrAdmin && !userCreatedVacationRequest)
+            if (!userCanCancel)
             {
-                return ApiErrors.Forbidden("You can only cancel your own vacation requests.");
+                return ApiErrors.Forbidden();
             }
 
             var response = await cancelVacationRequestHandler.HandleAsync(id, userId, cancellationToken);
