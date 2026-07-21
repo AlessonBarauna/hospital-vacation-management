@@ -19,7 +19,11 @@ builder.Services.Configure<JwtOptions>(
 
 builder.Host.UseSerilog((context, configuration) =>
 {
-    configuration.ReadFrom.Configuration(context.Configuration);
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.Seq("http://localhost:5341");
 });
 
 builder.Services.AddApiSwagger();

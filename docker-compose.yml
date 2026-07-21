@@ -10,30 +10,18 @@ services:
       - "5432:5432"
     volumes:
       - hospital_vacation_postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d hospital_vacation_management"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: hospital-vacation-api
-    depends_on:
-      postgres:
-        condition: service_healthy
+  seq:
+    image: datalust/seq:latest
+    container_name: hospital-vacation-seq
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__Database: Host=postgres;Port=5432;Database=hospital_vacation_management;Username=postgres;Password=postgres
-      Jwt__Issuer: HospitalVacationManagement
-      Jwt__Audience: HospitalVacationManagement
-      Jwt__SecretKey: this-is-a-development-secret-key-with-at-least-32-characters
-      Jwt__ExpirationInMinutes: 60
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
     ports:
-      - "8080:8080"
+      - "5341:80"
+    volumes:
+      - hospital_vacation_seq_data:/data
 
 volumes:
   hospital_vacation_postgres_data:
+  hospital_vacation_seq_data:
