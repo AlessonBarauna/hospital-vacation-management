@@ -25,7 +25,7 @@ public sealed class AuthenticationEndpointTests : IClassFixture<CustomWebApplica
     [Fact]
     public async Task GetMe_ShouldReturnUnauthorized_WhenTokenWasNotProvided()
     {
-        var response = await _client.GetAsync("/me");
+        var response = await _client.GetAsync("/api/v1/me");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -48,7 +48,7 @@ public sealed class AuthenticationEndpointTests : IClassFixture<CustomWebApplica
             Password = "SenhaErrada@123"
         };
 
-        var response = await client.PostAsJsonAsync("/auth/login", request);
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", request);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -56,7 +56,7 @@ public sealed class AuthenticationEndpointTests : IClassFixture<CustomWebApplica
     [Fact]
     public async Task GetUsers_ShouldReturnUnauthorized_WhenTokenWasNotProvided()
     {
-        var response = await _client.GetAsync("/users");
+        var response = await _client.GetAsync("/api/v1/users");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -77,7 +77,7 @@ public sealed class AuthenticationEndpointTests : IClassFixture<CustomWebApplica
             "Bearer",
             loginResponse.AccessToken);
 
-        var response = await client.GetAsync("/users");
+        var response = await client.GetAsync("/api/v1/users");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -113,7 +113,7 @@ public async Task Login_ShouldReturnToken_WhenCredentialsAreValid()
         Password = "Maria@123"
     };
 
-    var response = await client.PostAsJsonAsync("/auth/login", request);
+    var response = await client.PostAsJsonAsync("/api/v1/auth/login", request);
 
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 

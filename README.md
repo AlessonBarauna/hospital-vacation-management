@@ -155,13 +155,11 @@ Bearer SEU_TOKEN
 ### Férias
 
 ```http
-POST /vacation-requests/validate
-POST /vacation-requests
-GET /vacation-requests
-GET /vacation-requests/{id}
-PUT /vacation-requests/{id}/approve
-PUT /vacation-requests/{id}/reject
-PUT /vacation-requests/{id}/cancel
+POST /api/v1/vacation-requests
+GET /api/v1/vacation-requests
+PUT /api/v1/vacation-requests/{id}/approve
+PUT /api/v1/vacation-requests/{id}/reject
+PUT /api/v1/vacation-requests/{id}/cancel
 ```
 
 ### Setores

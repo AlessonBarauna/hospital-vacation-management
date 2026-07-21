@@ -1,20 +1,21 @@
-using HospitalVacationManagement.Api.Endpoints;
-
-namespace HospitalVacationManagement.Api.Extensions;
+namespace HospitalVacationManagement.Api.Endpoints;
 
 public static class EndpointExtensions
 {
-    public static WebApplication MapApiEndpoints(this WebApplication app)
+    public static IEndpointRouteBuilder MapApiEndpoints(this IEndpointRouteBuilder app)
     {
+        var apiV1 = app.MapGroup("/api/v1");
+
+        apiV1.MapAuthEndpoints();
+        apiV1.MapMeEndpoints();
+        apiV1.MapUserEndpoints();
+        apiV1.MapDepartmentEndpoints();
+        apiV1.MapEmployeeEndpoints();
+        apiV1.MapVacationRequestEndpoints();
+        apiV1.MapCalendarEndpoints();
+        apiV1.MapReportEndpoints();
+
         app.MapSystemEndpoints();
-        app.MapAuthEndpoints();
-        app.MapUserEndpoints();
-        app.MapMeEndpoints();
-        app.MapDepartmentEndpoints();
-        app.MapEmployeeEndpoints();
-        app.MapVacationRequestEndpoints();
-        app.MapCalendarEndpoints();
-        app.MapReportEndpoints();
 
         return app;
     }

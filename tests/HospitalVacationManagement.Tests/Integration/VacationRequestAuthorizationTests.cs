@@ -27,7 +27,7 @@ public sealed class VacationRequestAuthorizationTests : IClassFixture<WebApplica
     {
         var client = _factory.CreateClient();
 
-        var loginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest(
             "admin@hospital.com",
             "Admin@123"));
 
@@ -37,7 +37,7 @@ public sealed class VacationRequestAuthorizationTests : IClassFixture<WebApplica
             "Bearer",
             loginContent!.AccessToken);
 
-        var response = await client.PutAsync($"/vacation-requests/{Guid.NewGuid()}/cancel", null);
+        var response = await client.PutAsync($"/api/v1/vacation-requests/{Guid.NewGuid()}/cancel", null);
 
         var responseBody = await response.Content.ReadAsStringAsync();
 
@@ -108,7 +108,7 @@ public sealed class VacationRequestAuthorizationTests : IClassFixture<WebApplica
 
         await dbContext.SaveChangesAsync();
 
-        var loginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest(
             userTryingToCancelEmail,
             "User@123"));
 
@@ -118,7 +118,7 @@ public sealed class VacationRequestAuthorizationTests : IClassFixture<WebApplica
             "Bearer",
             loginContent!.AccessToken);
 
-        var response = await client.PutAsync($"/vacation-requests/{vacationRequestId}/cancel", null);
+        var response = await client.PutAsync($"/api/v1/vacation-requests/{vacationRequestId}/cancel", null);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
