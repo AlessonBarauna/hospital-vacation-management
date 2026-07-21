@@ -41,6 +41,7 @@ builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.AddApiAuthorization();
 var app = builder.Build();
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseSerilogRequestLogging();
