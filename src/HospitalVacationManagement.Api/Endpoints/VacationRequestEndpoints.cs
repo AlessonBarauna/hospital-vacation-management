@@ -34,7 +34,7 @@ public static class VacationRequestEndpoints
         app.MapPost("/vacation-requests", async (
             RequestVacationRequest request,
             IValidator<RequestVacationRequest> validator,
-            RequestVacationHandler handler,
+            [FromServices] RequestVacationHandler handler,
             ICurrentUserService currentUser,
             CancellationToken cancellationToken) =>
         {
@@ -59,7 +59,7 @@ public static class VacationRequestEndpoints
     DateOnly? endDate,
     int page,
     int pageSize,
-    ListVacationRequestsHandler handler,
+    [FromServices] ListVacationRequestsHandler handler,
     CancellationToken cancellationToken) =>
 {
     var request = new ListVacationRequestsRequest(
@@ -79,7 +79,7 @@ public static class VacationRequestEndpoints
 
         app.MapGet("/vacation-requests/{id:guid}", async (
             Guid id,
-            GetVacationRequestByIdHandler handler,
+            [FromServices] GetVacationRequestByIdHandler handler,
             CancellationToken cancellationToken) =>
         {
             var response = await handler.HandleAsync(id, cancellationToken);
@@ -93,7 +93,7 @@ public static class VacationRequestEndpoints
         app.MapPut("/vacation-requests/{id:guid}/approve", async (
             Guid id,
             ICurrentUserService currentUser,
-            ApproveVacationRequestHandler handler,
+            [FromServices] ApproveVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
             if (currentUser.UserId is not Guid userId)
@@ -112,7 +112,7 @@ public static class VacationRequestEndpoints
         app.MapPut("/vacation-requests/{id:guid}/reject", async (
             Guid id,
             ICurrentUserService currentUser,
-            RejectVacationRequestHandler handler,
+            [FromServices] RejectVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
             if (currentUser.UserId is not Guid userId)
