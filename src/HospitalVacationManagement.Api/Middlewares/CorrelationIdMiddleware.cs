@@ -1,4 +1,5 @@
 namespace HospitalVacationManagement.Api.Middlewares;
+using Serilog.Context;
 
 public sealed class CorrelationIdMiddleware
 {
@@ -21,10 +22,7 @@ public sealed class CorrelationIdMiddleware
 
         httpContext.Response.Headers[CorrelationIdHeaderName] = correlationId;
 
-        using (_logger.BeginScope(new Dictionary<string, object>
-        {
-            ["CorrelationId"] = correlationId
-        }))
+        using (LogContext.PushProperty("CorrelationId", correlationId))
         {
             await _next(httpContext);
         }
