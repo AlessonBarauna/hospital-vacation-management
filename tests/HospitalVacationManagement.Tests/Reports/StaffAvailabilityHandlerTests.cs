@@ -73,7 +73,7 @@ public sealed class StaffAvailabilityHandlerTests
 
         departmentRepository.Add(department);
 
-        var result = await handler.HandleAsync(request, CancellationToken.None);
+        var result = await handler.xdxxxHandleAsync(request, CancellationToken.None);
 
         Assert.Equal(departmentId, result.DepartmentId);
         Assert.Equal(3, result.TotalEmployees);
@@ -81,5 +81,28 @@ public sealed class StaffAvailabilityHandlerTests
         Assert.Equal(2, result.AvailableEmployees);
         Assert.Equal(1, result.AvailableSeniorEmployees);
         Assert.Equal("Emergency", result.DepartmentName);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldThrowInvalidOperationException_WhenDepartmentDoesNotExist()
+    {
+        var departmentRepository = new FakeDepartmentRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var vacationRequestRepository = new FakeVacationRequestRepository();
+
+        var handler = new StaffAvailabilityHandler(
+            departmentRepository,
+            employeeRepository,
+            vacationRequestRepository);
+
+        var request = new StaffAvailabilityRequest(
+            Guid.NewGuid(),
+            new DateOnly(2026, 7, 10),
+            new DateOnly(2026, 7, 20));
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            handler.xdxxxHandleAsync(request, CancellationToken.None));
+
+        Assert.Equal("Department was not found.", exception.Message);
     }
 }

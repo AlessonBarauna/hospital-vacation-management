@@ -19,7 +19,7 @@ public sealed class StaffAvailabilityHandler
         _vacationRequestRepository = vacationRequestRepository;
     }
 
-    public async Task<StaffAvailabilityResponse> HandleAsync(
+    public async Task<StaffAvailabilityResponse> xdxxxHandleAsync(
         StaffAvailabilityRequest request,
         CancellationToken cancellationToken = default)
     {
