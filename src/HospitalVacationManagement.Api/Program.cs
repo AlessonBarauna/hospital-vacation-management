@@ -6,6 +6,8 @@ using HospitalVacationManagement.Application.Authentication;
 using HospitalVacationManagement.Api.Endpoints;
 using HospitalVacationManagement.Api.Extensions;
 using HospitalVacationManagement.Api.Middlewares;
+using HospitalVacationManagement.Api.Services;
+using HospitalVacationManagement.Application.Abstractions;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -25,6 +27,8 @@ builder.Services.AddApiHealthChecks(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApiRateLimiting();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
