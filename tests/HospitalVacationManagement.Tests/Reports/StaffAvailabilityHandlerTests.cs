@@ -76,11 +76,12 @@ public sealed class StaffAvailabilityHandlerTests
         var result = await handler.HandleAsync(request, CancellationToken.None);
 
         Assert.Equal(departmentId, result.DepartmentId);
+        Assert.Equal("Emergency", result.DepartmentName);
         Assert.Equal(3, result.TotalEmployees);
         Assert.Equal(1, result.EmployeesOnVacation);
         Assert.Equal(2, result.AvailableEmployees);
         Assert.Equal(1, result.AvailableSeniorEmployees);
-        Assert.Equal("Emergency", result.DepartmentName);
+        Assert.Equal(66.67m, result.AvailabilityRate);
         Assert.True(result.IsSafe);
         Assert.Null(result.RiskReason);
     }
@@ -144,6 +145,7 @@ public sealed class StaffAvailabilityHandlerTests
 
         Assert.False(result.IsSafe);
         Assert.Equal("Department has no available senior employees.", result.RiskReason);
+        Assert.Equal(50m, result.AvailabilityRate);
     }
 
     [Fact]
@@ -240,5 +242,6 @@ public sealed class StaffAvailabilityHandlerTests
 
         Assert.False(result.IsSafe);
         Assert.Equal("Department has no available employees.", result.RiskReason);
+        Assert.Equal(0m, result.AvailabilityRate);
     }
 }

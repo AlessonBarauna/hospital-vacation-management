@@ -8,6 +8,7 @@ public sealed class StaffAvailabilityHandler
 {
     private readonly IEmployeeRepository _employeeRepository;
     private readonly IVacationRequestRepository _vacationRequestRepository;
+    private readonly IDepartmentRepository _departmentRepository;
 
     public StaffAvailabilityHandler(
         IDepartmentRepository departmentRepository,
@@ -72,15 +73,20 @@ public sealed class StaffAvailabilityHandler
             riskReason = "Department has no available senior employees.";
         }
 
+        var totalEmployees = employees.Count();
+        var availabilityRate = totalEmployees == 0
+            ? 0
+            : Math.Round((decimal)availableEmployees.Count / totalEmployees * 100, 2);
+
         return new StaffAvailabilityResponse(
             request.DepartmentId,
             department.Name,
-            employees.Count(),
+            totalEmployees,
             employeeIdsOnVacation.Count,
             availableEmployees.Count,
             availableSeniorEmployees,
+            availabilityRate,
             isSafe,
             riskReason);
     }
-    private readonly IDepartmentRepository _departmentRepository;
 }
