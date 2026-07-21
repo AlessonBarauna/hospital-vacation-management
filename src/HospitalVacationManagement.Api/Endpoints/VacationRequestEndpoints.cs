@@ -131,8 +131,7 @@ public static class VacationRequestEndpoints
         app.MapPut("/vacation-requests/{id:guid}/cancel", async (
             Guid id,
             ICurrentUserService currentUser,
-            [FromServices] GetVacationRequestByIdHandler getVacationRequestByIdHandler,
-            [FromServices] CancelVacationRequestHandler cancelVacationRequestHandler,
+            [FromServices] CancelVacationRequestHandler handler,
             CancellationToken cancellationToken) =>
         {
             if (currentUser.UserId is not Guid userId)
@@ -140,25 +139,7 @@ public static class VacationRequestEndpoints
                 return ApiErrors.Unauthorized();
             }
 
-            var vacationRequest = await getVacationRequestByIdHandler.HandleAsync(id, cancellationToken);
-
-            if (vacationRequest is null)
-            {
-                return ApiErrors.NotFound();
-            }
-
-            var currentUserRole = currentUser.Role;
-
-            var userCanCancel =
-                currentUserRole is "Admin" or "Manager" ||
-                vacationRequest.EmployeeId == userId;
-
-            if (!userCanCancel)
-            {
-                return ApiErrors.Forbidden();
-            }
-
-            var response = await cancelVacationRequestHandler.HandleAsync(id, userId, cancellationToken);
+            var response = await handler.HandleAsync(id, userId, cancellationToken);
 
             return response is null
                 ? ApiErrors.NotFound()

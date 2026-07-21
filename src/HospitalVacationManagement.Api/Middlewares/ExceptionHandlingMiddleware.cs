@@ -6,13 +6,16 @@ public sealed class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly IHostEnvironment _environment;
 
     public ExceptionHandlingMiddleware(
         RequestDelegate next,
-        ILogger<ExceptionHandlingMiddleware> logger)
+        ILogger<ExceptionHandlingMiddleware> logger,
+        IHostEnvironment environment)
     {
         _next = next;
         _logger = logger;
+        _environment = environment;
     }
 
     public async Task InvokeAsync(HttpContext httpContext)
@@ -39,11 +42,15 @@ public sealed class ExceptionHandlingMiddleware
                 exception,
                 "An unhandled exception occurred.");
 
+            var detail = _environment.IsDevelopment()
+                ? exception.Message
+                : "An unexpected error occurred.";
+
             await WriteProblemDetailsAsync(
                 httpContext,
                 StatusCodes.Status500InternalServerError,
                 "Internal Server Error",
-                "An unexpected error occurred.");
+                detail);
         }
     }
 

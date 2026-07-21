@@ -15,29 +15,26 @@ public sealed class CancelVacationRequestHandler
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<ChangeVacationRequestStatusResponse> HandleAsync(
-        Guid id,
-        Guid currentUserId,
+    public async Task<ChangeVacationRequestStatusResponse?> HandleAsync(
+        Guid vacationRequestId,
+        Guid cancelledByUserId,
         CancellationToken cancellationToken)
     {
-        var vacationRequest = await _vacationRequestRepository.GetByIdAsync(id, cancellationToken);
+        var vacationRequest = await _vacationRequestRepository.GetByIdAsync(
+            vacationRequestId,
+            cancellationToken);
 
         if (vacationRequest is null)
         {
-            return new ChangeVacationRequestStatusResponse(false, ["Vacation request was not found."]);
+            return null;
         }
 
-        try
-        {
-            vacationRequest.Cancel(currentUserId);
+        vacationRequest.Cancel(cancelledByUserId);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new ChangeVacationRequestStatusResponse(true, []);
-        }
-        catch (InvalidOperationException exception)
-        {
-            return new ChangeVacationRequestStatusResponse(false, [exception.Message]);
-        }
+        return new ChangeVacationRequestStatusResponse(
+            true,
+            []);
     }
 }
