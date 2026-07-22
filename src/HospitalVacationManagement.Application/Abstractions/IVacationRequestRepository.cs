@@ -19,14 +19,6 @@ public interface IVacationRequestRepository
     int page,
     int pageSize,
     CancellationToken cancellationToken);
-
-    Task<int> CountAsync(
-        VacationRequestStatus? status,
-        Guid? employeeId,
-        IReadOnlyCollection<Guid>? employeeIds,
-        DateOnly? startDate,
-        DateOnly? endDate,
-        CancellationToken cancellationToken);
     Task<VacationRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
     Task<bool> HasOverlappingRequestForEmployeeAsync(
@@ -45,4 +37,12 @@ public interface IVacationRequestRepository
         DateOnly startDate,
         DateOnly endDate,
         CancellationToken cancellationToken);
-}
+
+    Task<int> CountAsync(
+        VacationRequestStatus? status,
+        Guid? employeeId,
+        IReadOnlyCollection<Guid>? employeeIds,
+        DateOnly? startDate,
+        DateOnly? endDate,
+        CancellationToken cancellationToken);
+    }

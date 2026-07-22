@@ -20,7 +20,7 @@ public static class AuthEndpoints
 
             if (user is null || !user.IsActive)
             {
-                return ApiErrors.Unauthorized("Invalid email or password.");
+                return ApiErrors.Unauthorized();
             }
 
             var passwordIsValid = passwordHasher.Verify(
@@ -29,7 +29,7 @@ public static class AuthEndpoints
 
             if (!passwordIsValid)
             {
-                return ApiErrors.Unauthorized("Invalid email or password.");
+                return ApiErrors.Unauthorized();
             }
 
             var loginResponse = jwtTokenGenerator.Generate(

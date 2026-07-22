@@ -55,18 +55,6 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
 
     }
 
-    public async Task<int> CountAsync(
-    VacationRequestStatus? status,
-    Guid? employeeId,
-    IReadOnlyCollection<Guid>? employeeIds,
-    DateOnly? startDate,
-    DateOnly? endDate,
-    CancellationToken cancellationToken)
-    {
-        return await ApplyFilters(status, employeeId, employeeIds, startDate, endDate)
-            .CountAsync(cancellationToken);
-    }
-
     private IQueryable<VacationRequest> ApplyFilters(
     VacationRequestStatus? status,
     Guid? employeeId,
@@ -163,5 +151,24 @@ public sealed class VacationRequestRepository : IVacationRequestRepository
                 vacationRequest.EndDate >= startDate)
             .OrderBy(vacationRequest => vacationRequest.StartDate)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAsync(
+        VacationRequestStatus? status,
+        Guid? employeeId,
+        IReadOnlyCollection<Guid>? employeeIds,
+        DateOnly? startDate,
+        DateOnly? endDate,
+        CancellationToken cancellationToken)
+    {
+        var query = ApplyFilters(
+            status,
+            employeeId,
+            employeeIds,
+            startDate,
+            endDate);
+
+        return await query.CountAsync(cancellationToken);
+
     }
 }

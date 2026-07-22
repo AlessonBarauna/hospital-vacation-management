@@ -1,5 +1,6 @@
 using HospitalVacationManagement.Application.Employees;
 using Microsoft.AspNetCore.Mvc;
+using HospitalVacationManagement.Api.Errors;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -15,8 +16,8 @@ public static class EmployeeEndpoints
             var response = await handler.HandleAsync(request, cancellationToken);
 
             return response is null
-        ? Results.BadRequest("Department was not found.")
-        : Results.Created($"/employees/{response.Id}", response);
+                ? ApiErrors.BadRequest("Department was not found.")
+                : Results.Created($"/employees/{response.Id}", response);
 })
 .RequireAuthorization("AdminOnly");
 
@@ -38,7 +39,7 @@ public static class EmployeeEndpoints
             var response = await handler.HandleAsync(id, cancellationToken);
 
             return response is null
-                ? Results.NotFound()
+                ? ApiErrors.NotFound()
                 : Results.Ok(response);
         })
         .RequireAuthorization();

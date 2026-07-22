@@ -1,4 +1,5 @@
 using HospitalVacationManagement.Application.Abstractions;
+using HospitalVacationManagement.Application.Common;
 
 namespace HospitalVacationManagement.Application.Vacations;
 

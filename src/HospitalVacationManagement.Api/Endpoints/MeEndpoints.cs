@@ -37,7 +37,7 @@ public static class MeEndpoints
         {
             if (currentUser.UserId is not Guid userId)
             {
-                return Results.Unauthorized();
+                return ApiErrors.Unauthorized();
             }
 
             var validationResult = await validator.ValidateAsync(request, cancellationToken);

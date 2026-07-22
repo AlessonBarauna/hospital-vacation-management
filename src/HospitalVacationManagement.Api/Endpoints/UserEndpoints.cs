@@ -1,6 +1,6 @@
 using FluentValidation;
 using HospitalVacationManagement.Application.Users;
-using System.Security.Claims;
+using HospitalVacationManagement.Application.Abstractions;
 using HospitalVacationManagement.Api.Errors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -98,17 +98,14 @@ public static class UserEndpoints
 
         app.MapPut("/users/{id:guid}/deactivate", async (
             Guid id,
-            ClaimsPrincipal currentUser,
+            ICurrentUserService  currentUser,
             [FromServices] DeactivateUserHandler deactivateUserHandler,
             CancellationToken cancellationToken) =>
         {
-            var currentUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (currentUserId == id.ToString())
+            if (currentUser.UserId == id)
             {
                 return ApiErrors.BadRequest("You cannot deactivate your own user.");
             }
-
             var userWasDeactivated = await deactivateUserHandler.HandleAsync(id, cancellationToken);
 
             return userWasDeactivated

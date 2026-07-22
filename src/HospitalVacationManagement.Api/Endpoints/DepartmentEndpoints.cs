@@ -1,5 +1,6 @@
 using HospitalVacationManagement.Application.Departments;
 using Microsoft.AspNetCore.Mvc;
+using HospitalVacationManagement.Api.Errors;
 
 namespace HospitalVacationManagement.Api.Endpoints;
 
@@ -36,7 +37,7 @@ public static class DepartmentEndpoints
             var response = await handler.HandleAsync(id, cancellationToken);
 
             return response is null
-                ? Results.NotFound()
+                ? ApiErrors.NotFound()
                 : Results.Ok(response);
         })
         .RequireAuthorization();
