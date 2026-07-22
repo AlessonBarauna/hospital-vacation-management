@@ -23,7 +23,7 @@ builder.Host.UseSerilog((context, configuration) =>
         .ReadFrom.Configuration(context.Configuration)
         .Enrich.FromLogContext()
         .WriteTo.Console()
-        .WriteTo.Seq("http://localhost:5341");
+        .WriteTo.Seq(context.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341");
 });
 
 builder.Services.AddApiSwagger();

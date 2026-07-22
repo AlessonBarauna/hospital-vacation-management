@@ -12,6 +12,7 @@ services:
       Jwt__Audience: HospitalVacationManagement
       Jwt__SecretKey: super-secret-key-for-development-only-change-this-value
       Jwt__ExpirationInMinutes: 120
+      Seq__ServerUrl: http://seq:5341
     ports:
       - "8080:8080"
     depends_on:

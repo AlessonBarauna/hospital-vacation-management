@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<ChangeOwnPasswordHandler>();
         services.AddScoped<ActivateUserHandler>();
         services.AddScoped<DeactivateUserHandler>();
+        services.AddScoped<GetCurrentUserHandler>();
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
