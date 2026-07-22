@@ -1,7 +1,8 @@
-**/bin/
-**/obj/
+bin/
+obj/
 .git/
 .vs/
-logs/
-**/logs/
-*.log
+.vscode/
+TestResults/
+**/bin/
+**/obj/
